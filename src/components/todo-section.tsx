@@ -39,7 +39,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
           <Input
             name="text"
             placeholder="Add a daily task..."
-            className="flex-1"
+            className="flex-1 bg-background focus-visible:ring-2 focus-visible:ring-primary"
             autoComplete="off"
           />
           <input type="hidden" name="type" value="daily" />
