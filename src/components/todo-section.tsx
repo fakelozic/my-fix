@@ -20,13 +20,13 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
 
   return (
     <Card className="w-full h-full flex flex-col bg-background/50 backdrop-blur-sm">
-      <CardHeader>
+      <CardHeader className="pb-1">
         <CardTitle className="flex items-center gap-2">
           <Check className="w-5 h-5 text-primary" />
           Daily Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
+      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden p-4 pt-3">
         
         <form
           action={async (formData) => {
@@ -34,7 +34,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             formRef.current?.reset();
           }}
           ref={formRef}
-          className="flex gap-2"
+          className="flex gap-2 relative z-10"
         >
           <Input
             name="text"
@@ -49,7 +49,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             value="30" 
             size="sm" 
             variant="secondary"
-            className="h-8"
+            className="h-9"
           >
             30m
           </Button>
@@ -59,13 +59,13 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             value="60" 
             size="sm" 
             variant="default"
-            className="h-8"
+            className="h-9"
           >
             60m
           </Button>
         </form>
 
-        <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 min-h-[200px]">
+        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 min-h-[200px] -mx-2">
           {todos.length === 0 ? (
             <div className="text-center text-muted-foreground py-8 text-sm">
               No tasks yet. Add one to get started!

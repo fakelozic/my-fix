@@ -1,5 +1,6 @@
 import { Todo } from "@/db/schema";
 import { getTodos } from "@/app/actions";
+import { logoutAction } from "@/app/auth-actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
@@ -10,7 +11,8 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock, CurrentDate } from "@/components/digital-clock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Flame, LogOut } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -77,8 +79,13 @@ export default async function Home() {
     <main className="min-h-screen bg-linear-to-br from-background to-muted p-6 flex flex-col gap-6">
       <div className="w-full h-full space-y-6">
         {/* Global Header with Mode Toggle */}
-        <div className="absolute right-6 top-6 z-50">
+        <div className="absolute right-6 top-6 z-50 flex items-center gap-2">
             <ModeToggle />
+            <form action={logoutAction}>
+                <Button variant="ghost" size="icon" title="Logout">
+                    <LogOut className="w-4 h-4" />
+                </Button>
+            </form>
         </div>
 
         <Tabs defaultValue="today" className="w-full h-full flex flex-col">
