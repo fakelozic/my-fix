@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Pause, RotateCcw, Coffee, Brain, Settings2, Plus, Minus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -166,7 +167,7 @@ export function PomodoroTimer() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8 rounded-full shrink-0"
                   onClick={() => {
                     const val = Math.max(1, customMinutes - 1);
                     setCustomMinutes(val);
@@ -176,14 +177,36 @@ export function PomodoroTimer() {
                   <Minus className="h-4 w-4" />
                 </Button>
                 
-                <div className="w-16 text-center font-mono text-2xl font-bold tabular-nums">
-                  {customMinutes}
-                </div>
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  className="w-16 h-10 text-center font-mono text-lg font-bold tabular-nums"
+                  value={customMinutes}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    // Allow typing freely but clamp on blur effectively by user logic if needed, 
+                    // but for smooth typing we just set state. 
+                    // We might want to clamp only if it exceeds reasonable bounds visually or logically.
+                    // For now, let's just limit max length or value roughly.
+                    if (val >= 0 && val <= 999) {
+                        setCustomMinutes(val);
+                        if (val > 0) setTimeLeft(val * 60);
+                    }
+                  }}
+                  onBlur={() => {
+                      let val = customMinutes;
+                      if (val < 1) val = 1;
+                      if (val > 120) val = 120;
+                      setCustomMinutes(val);
+                      setTimeLeft(val * 60);
+                  }}
+                />
 
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8 rounded-full shrink-0"
                   onClick={() => {
                     const val = Math.min(120, customMinutes + 1);
                     setCustomMinutes(val);
