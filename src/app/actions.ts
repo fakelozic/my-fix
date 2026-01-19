@@ -18,6 +18,7 @@ export async function addTodo(formData: FormData) {
   await db.insert(todos).values({
     text,
     duration,
+    status: "todo",
     completed: false,
     createdAt: new Date(),
   });
@@ -30,7 +31,21 @@ export async function toggleTodo(id: number, completed: boolean) {
     .update(todos)
     .set({ 
       completed,
+      status: completed ? "done" : "todo",
       completedAt: completed ? new Date() : null 
+    })
+    .where(eq(todos.id, id));
+  revalidatePath("/");
+}
+
+export async function updateTodoStatus(id: number, status: string) {
+  const completed = status === "done";
+  await db
+    .update(todos)
+    .set({ 
+      status, 
+      completed,
+      completedAt: completed ? new Date() : null
     })
     .where(eq(todos.id, id));
   revalidatePath("/");

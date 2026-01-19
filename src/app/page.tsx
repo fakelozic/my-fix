@@ -2,7 +2,8 @@ import { getTodos } from "@/app/actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
-import { BrainDump } from "@/components/brain-dump";
+import { StickyNotes } from "@/components/sticky-notes";
+import { KanbanBoard } from "@/components/kanban-board";
 import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock } from "@/components/digital-clock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +13,7 @@ import { CalendarDays, Flame } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 function calculateStreak(todos: any[]) {
+  // ... existing logic ...
   const completedDates = todos
     .filter((t) => t.completed && t.completedAt)
     .map((t) => new Date(t.completedAt).toDateString())
@@ -24,27 +26,20 @@ function calculateStreak(todos: any[]) {
   const today = new Date().toDateString();
   const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toDateString();
 
-  // If the most recent is not today or yesterday, streak is broken
   if (completedDates[0] !== today && completedDates[0] !== yesterday) {
     return 0;
   }
 
-  // Count consecutive days
   let currentDate = new Date(completedDates[0]);
   
   for (let i = 0; i < completedDates.length; i++) {
-    const dateToCheck = new Date(completedDates[i]);
-    // Check if dateToCheck is same as currentDate (it should be for the first iteration)
-    // or exactly 1 day before previous currentDate
-    
-    // Actually, simpler: Iterate and check gaps.
     if (i === 0) {
       streak++;
       continue;
     }
     
     const prevDate = new Date(completedDates[i-1]);
-    const diffTime = Math.abs(prevDate.getTime() - dateToCheck.getTime());
+    const diffTime = Math.abs(prevDate.getTime() - new Date(completedDates[i]).getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
     if (diffDays === 1) {
@@ -61,7 +56,6 @@ export default async function Home() {
   const todos = await getTodos();
   const streak = calculateStreak(todos);
 
-  // Calculate daily stats for Today's View
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -91,49 +85,52 @@ export default async function Home() {
 
         <Tabs defaultValue="today" className="w-full h-full">
           <div className="flex justify-center mb-8">
-            <TabsList className="scale-125 origin-top">
-              <TabsTrigger value="today" className="px-6 py-2">Today's Dashboard</TabsTrigger>
-              <TabsTrigger value="history" className="px-6 py-2">History & Trends</TabsTrigger>
+            <TabsList>
+              <TabsTrigger value="today">Today's Dashboard</TabsTrigger>
+              <TabsTrigger value="history">History & Trends</TabsTrigger>
+              <TabsTrigger value="kanban">Kanban Board</TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="today" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-12 gap-8 h-full">
-               {/* Left Column: Stats & Brain Dump (3 cols) */}
-               <div className="col-span-12 lg:col-span-3 space-y-6">
+               {/* Left Column: Stats & Sticky Notes (3 cols) */}
+               <div className="col-span-12 lg:col-span-3 space-y-6 flex flex-col">
                   {/* Stats Stacked */}
-                  <Card className="bg-background/50 backdrop-blur-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm font-medium text-muted-foreground">Today's Focus</p>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold tracking-tighter">
-                            {hours > 0 ? `${hours}h ` : ""}{minutes}m
-                          </span>
+                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+                    <Card className="bg-background/50 backdrop-blur-sm">
+                        <CardContent className="pt-6">
+                        <div className="flex flex-col gap-1">
+                            <p className="text-sm font-medium text-muted-foreground">Today's Focus</p>
+                            <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold tracking-tighter">
+                                {hours > 0 ? `${hours}h ` : ""}{minutes}m
+                            </span>
+                            </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        </CardContent>
+                    </Card>
 
-                  <Card className="bg-background/50 backdrop-blur-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-orange-500">
-                          <Flame className="w-5 h-5" />
-                          <p className="text-sm font-medium">Focus Streak</p>
+                    <Card className="bg-background/50 backdrop-blur-sm">
+                        <CardContent className="pt-6">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-orange-500">
+                            <Flame className="w-5 h-5" />
+                            <p className="text-sm font-medium">Focus Streak</p>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold tracking-tighter text-orange-500">
+                                {streak}
+                            </span>
+                            <span className="text-sm text-muted-foreground uppercase">Days</span>
+                            </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold tracking-tighter text-orange-500">
-                            {streak}
-                          </span>
-                          <span className="text-sm text-muted-foreground uppercase">Days</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        </CardContent>
+                    </Card>
+                  </div>
 
-                  <div className="h-[400px] lg:h-auto lg:flex-1">
-                    <BrainDump />
+                  <div className="h-[400px] lg:flex-1 min-h-[300px]">
+                    <StickyNotes />
                   </div>
                </div>
 
@@ -146,11 +143,15 @@ export default async function Home() {
 
           <TabsContent value="history" className="space-y-8">
              <div className="grid grid-cols-1 gap-8 max-w-6xl mx-auto">
-                <div className="h-[500px]">
+                <div className="h-[350px]">
                   <HistoryChart todos={todos} />
                 </div>
                 <CalendarStats todos={todos} />
              </div>
+          </TabsContent>
+
+          <TabsContent value="kanban" className="space-y-8 h-full">
+              <KanbanBoard todos={todos} />
           </TabsContent>
         </Tabs>
       </div>
