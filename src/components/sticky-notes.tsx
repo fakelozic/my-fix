@@ -68,8 +68,8 @@ export function StickyNotes() {
           <Plus className="w-3 h-3" /> New Note
         </Button>
       </CardHeader>
-      <CardContent className="p-4 flex-1 overflow-y-auto pt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
+      <CardContent className="p-4 flex-1 overflow-y-auto pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 pt-2">
           {notes.map((note) => (
             <div 
               key={note.id} 

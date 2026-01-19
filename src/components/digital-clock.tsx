@@ -30,7 +30,7 @@ export function DigitalClock() {
 
   return (
     <Card className="bg-background/50 backdrop-blur-sm border-none shadow-none w-full h-full flex items-center justify-center">
-      <CardContent className="p-6 flex flex-col items-center justify-center">
+      <CardContent className="p-2 flex flex-col items-center justify-center">
         <div className="text-7xl lg:text-9xl font-mono font-bold tracking-widest tabular-nums flex items-baseline gap-4 text-foreground/90">
           <span>{hours}:{minutes}</span>
           <span className="text-3xl lg:text-5xl text-muted-foreground/50">{seconds}</span>
