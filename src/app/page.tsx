@@ -1,6 +1,7 @@
 import { getTodos } from "@/app/actions";
 import { PomodoroTimer } from "@/components/pomodoro-timer";
 import { TodoSection } from "@/components/todo-section";
+import { CalendarStats } from "@/components/calendar-stats";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
 
@@ -20,7 +21,7 @@ export default async function Home() {
       new Date(t.completedAt) >= today
   );
 
-  const totalMinutes = completedToday.length * 30;
+  const totalMinutes = completedToday.reduce((acc, t) => acc + (t.duration || 30), 0);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
@@ -47,7 +48,7 @@ export default async function Home() {
                   </div>
                   <div>
                     <p className="text-sm font-medium leading-none">Today&apos;s Focus</p>
-                    <p className="text-xs text-muted-foreground">30m per task</p>
+                    <p className="text-xs text-muted-foreground">30m or 60m per task</p>
                   </div>
                 </div>
                 <div className="flex items-baseline space-x-1">
@@ -69,6 +70,11 @@ export default async function Home() {
           <div className="h-full min-h-[500px]">
             <TodoSection todos={todos} />
           </div>
+        </div>
+
+        {/* Calendar Stats Section */}
+        <div className="w-full">
+           <CalendarStats todos={todos} />
         </div>
       </div>
     </main>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Pause, RotateCcw, Coffee, Brain, Settings2, Plus, Minus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type TimerMode = "focus" | "shortBreak" | "custom";
+type TimerMode = "focus30" | "focus60" | "shortBreak" | "custom";
 
 interface ModeConfig {
   label: string;
@@ -17,15 +17,16 @@ interface ModeConfig {
 }
 
 const MODES: Record<TimerMode, ModeConfig> = {
-  focus: { label: "Focus", minutes: 25, icon: Brain, color: "text-red-500", bgColor: "bg-red-500/10" },
+  focus30: { label: "30m Focus", minutes: 30, icon: Brain, color: "text-red-500", bgColor: "bg-red-500/10" },
+  focus60: { label: "60m Focus", minutes: 60, icon: Brain, color: "text-indigo-500", bgColor: "bg-indigo-500/10" },
   shortBreak: { label: "Short Break", minutes: 5, icon: Coffee, color: "text-blue-500", bgColor: "bg-blue-500/10" },
   custom: { label: "Custom", minutes: 15, icon: Settings2, color: "text-orange-500", bgColor: "bg-orange-500/10" },
 };
 
 export function PomodoroTimer() {
-  const [mode, setMode] = useState<TimerMode>("focus");
+  const [mode, setMode] = useState<TimerMode>("focus30");
   const [customMinutes, setCustomMinutes] = useState(15);
-  const [timeLeft, setTimeLeft] = useState(MODES.focus.minutes * 60);
+  const [timeLeft, setTimeLeft] = useState(MODES.focus30.minutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
@@ -103,7 +104,8 @@ export function PomodoroTimer() {
 
   const getCompletionMessage = () => {
     switch (mode) {
-      case "focus":
+      case "focus30":
+      case "focus60":
         return {
           title: "Session Complete!",
           body: "Amazing work! You've made great progress. Time for a well-deserved break.",

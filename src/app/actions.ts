@@ -11,10 +11,13 @@ export async function getTodos() {
 
 export async function addTodo(formData: FormData) {
   const text = formData.get("text") as string;
+  const duration = parseInt(formData.get("duration") as string) || 30;
+  
   if (!text || text.trim().length === 0) return;
 
   await db.insert(todos).values({
     text,
+    duration,
     completed: false,
     createdAt: new Date(),
   });

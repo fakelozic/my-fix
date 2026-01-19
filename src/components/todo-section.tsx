@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { addTodo, toggleTodo, deleteTodo } from "@/app/actions";
 import { Todo } from "@/db/schema";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 export function TodoSection({ todos }: { todos: Todo[] }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [duration, setDuration] = useState<number>(30);
 
   return (
     <Card className="w-full max-w-md mx-auto h-full flex flex-col bg-background/50 backdrop-blur-sm">
@@ -26,19 +27,43 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
           action={async (formData) => {
             await addTodo(formData);
             formRef.current?.reset();
+            setDuration(30); // Reset to default
           }}
           ref={formRef}
-          className="flex gap-2"
+          className="flex flex-col gap-2"
         >
-          <Input
-            name="text"
-            placeholder="Add a new task..."
-            className="flex-1"
-            autoComplete="off"
-          />
-          <Button type="submit" size="icon">
-            <Plus className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Input
+              name="text"
+              placeholder="Add a new task..."
+              className="flex-1"
+              autoComplete="off"
+            />
+            <input type="hidden" name="duration" value={duration} />
+            <Button type="submit" size="icon">
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+          <div className="flex gap-2">
+             <Button
+                type="button"
+                variant={duration === 30 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDuration(30)}
+                className="flex-1 text-xs h-7"
+             >
+                30 Min
+             </Button>
+             <Button
+                type="button"
+                variant={duration === 60 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDuration(60)}
+                className="flex-1 text-xs h-7"
+             >
+                60 Min
+             </Button>
+          </div>
         </form>
 
         <div className="flex-1 overflow-y-auto pr-2 space-y-2 min-h-[200px]">
@@ -76,7 +101,7 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
                     {todo.text}
                   </span>
                   <div className="flex items-center text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded border mr-2">
-                    30m
+                    {todo.duration || 30}m
                   </div>
                 </div>
                 <Button
