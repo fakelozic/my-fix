@@ -5,7 +5,7 @@ import { Todo } from "@/db/schema";
 import { PomodoroTimer } from "@/components/pomodoro-timer";
 import { TodoSection } from "@/components/todo-section";
 import { Card, CardContent } from "@/components/ui/card";
-import { Target, X, Zap } from "lucide-react";
+import { Target, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 

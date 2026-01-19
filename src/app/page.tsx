@@ -1,3 +1,4 @@
+import { Todo } from "@/db/schema";
 import { getTodos } from "@/app/actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
@@ -8,15 +9,15 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock, CurrentDate } from "@/components/digital-clock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-function calculateStreak(todos: any[]) {
+function calculateStreak(todos: Todo[]) {
   // ... existing logic ...
   const completedDates = todos
     .filter((t) => t.completed && t.completedAt)
-    .map((t) => new Date(t.completedAt).toDateString())
+    .map((t) => new Date(t.completedAt!).toDateString())
     .filter((value, index, self) => self.indexOf(value) === index) // Unique dates
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()); // Descending
 
@@ -29,8 +30,6 @@ function calculateStreak(todos: any[]) {
   if (completedDates[0] !== today && completedDates[0] !== yesterday) {
     return 0;
   }
-
-  let currentDate = new Date(completedDates[0]);
   
   for (let i = 0; i < completedDates.length; i++) {
     if (i === 0) {
@@ -85,7 +84,7 @@ export default async function Home() {
           <div className="flex items-center justify-between mb-6 shrink-0 px-2">
             <CurrentDate />
             <TabsList>
-              <TabsTrigger value="today">Today's Dashboard</TabsTrigger>
+              <TabsTrigger value="today">Today&apos;s Dashboard</TabsTrigger>
               <TabsTrigger value="history">History & Trends</TabsTrigger>
               <TabsTrigger value="kanban">Kanban Board</TabsTrigger>
             </TabsList>
@@ -99,7 +98,7 @@ export default async function Home() {
                     <Card className="bg-background/50 backdrop-blur-sm">
                         <CardContent className="pt-6">
                         <div className="flex flex-col gap-1">
-                            <p className="text-sm font-medium text-muted-foreground">Today's Focus</p>
+                            <p className="text-sm font-medium text-muted-foreground">Today&apos;s Focus</p>
                             <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-bold tracking-tighter">
                                 {hours > 0 ? `${hours}h ` : ""}{minutes}m

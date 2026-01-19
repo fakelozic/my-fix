@@ -7,6 +7,7 @@ export function DigitalClock() {
   const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTime(new Date());
     const interval = setInterval(() => {
       setTime(new Date());
@@ -43,6 +44,7 @@ export function CurrentDate() {
   const [date, setDate] = useState<string | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate(new Date().toLocaleDateString(undefined, {
       weekday: "long",
       year: "numeric",

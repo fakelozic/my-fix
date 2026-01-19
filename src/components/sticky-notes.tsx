@@ -26,6 +26,7 @@ export function StickyNotes() {
     const saved = localStorage.getItem("focusflow-sticky-notes");
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNotes(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to load notes", e);

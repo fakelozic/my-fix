@@ -67,7 +67,7 @@ export function HistoryChart({ todos }: HistoryChartProps) {
               tickFormatter={(value) => `${value}m`}
             />
             <Tooltip
-              content={({ active, payload, label }) => {
+              content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
