@@ -25,10 +25,7 @@ function TaskCard({ todo, moveTask, colId, isOverlay, isDragging }: { todo: Todo
     <Card className={cn("bg-background shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing", isDragging && "opacity-50", isOverlay && "shadow-xl ring-2 ring-primary/20 opacity-100 cursor-grabbing")}>
         <CardContent className="p-3 flex flex-col gap-2">
             <p className="text-sm font-medium leading-snug">{todo.text}</p>
-            <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                    {todo.duration || 30}m
-                </span>
+            <div className="flex items-center justify-end mt-2 h-6">
                 {!isOverlay && moveTask && colId && (
                     <div className="flex gap-1" onPointerDown={(e) => e.stopPropagation()}> 
                         <Button
@@ -71,7 +68,7 @@ function DraggableCard({ todo, moveTask, colId }: { todo: Todo, moveTask: any, c
   
   const style = transform ? {
     // transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, // Use DragOverlay instead
-    opacity: isDragging ? 0 : 1, // Hide original
+    opacity: isDragging ? 0 : 1, // Hide original completely
   } : undefined;
 
   return (
