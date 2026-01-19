@@ -6,8 +6,14 @@ import { updateTodoStatus, addTodo } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Circle, Clock, CheckCircle2, Plus, ChevronRight, RotateCcw } from "lucide-react";
+import { Circle, Clock, CheckCircle2, Plus, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface KanbanBoardProps {
   todos: Todo[];
@@ -34,46 +40,6 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
 
   const moveTask = async (id: number, nextStatus: string) => {
      await updateTodoStatus(id, nextStatus);
-  };
-
-  const getAction = (status: string, id: number) => {
-      switch (status) {
-          case "todo":
-              return (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => moveTask(id, "in-progress")}
-                    className="h-6 text-xs text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 px-2"
-                  >
-                    Start <ChevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-              );
-          case "in-progress":
-              return (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => moveTask(id, "done")}
-                    className="h-6 text-xs text-muted-foreground hover:text-green-500 hover:bg-green-500/10 px-2"
-                  >
-                    Finish <CheckCircle2 className="w-3 h-3 ml-1" />
-                  </Button>
-              );
-          case "done":
-              return (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => moveTask(id, "todo")}
-                    className="h-6 text-xs text-muted-foreground hover:text-slate-500 hover:bg-slate-500/10 px-2"
-                  >
-                    Reopen <RotateCcw className="w-3 h-3 ml-1" />
-                  </Button>
-              );
-          default:
-              return null;
-      }
   };
 
   return (
@@ -121,10 +87,26 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                  ) : (
                     colTodos.map(todo => (
                         <Card key={todo.id} className="bg-background shadow-sm hover:shadow-md transition-all duration-200">
-                            <CardContent className="p-4 flex flex-col gap-3">
-                                <p className="text-base font-medium leading-relaxed">{todo.text}</p>
-                                <div className="flex items-center justify-end">
-                                    {getAction(col.id, todo.id)}
+                            <CardContent className="p-3 flex flex-col gap-2">
+                                <div className="flex justify-between items-start gap-2">
+                                    <p className="text-base font-medium leading-relaxed break-words">{todo.text}</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon-sm" className="h-6 w-6 shrink-0 text-muted-foreground">
+                                                <MoreHorizontal className="w-4 h-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            {COLUMNS.filter(c => c.id !== col.id).map(targetCol => (
+                                                <DropdownMenuItem 
+                                                    key={targetCol.id}
+                                                    onClick={() => moveTask(todo.id, targetCol.id)}
+                                                >
+                                                    Move to {targetCol.label}
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             </CardContent>
                         </Card>
