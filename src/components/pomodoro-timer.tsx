@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Pause, RotateCcw, Coffee, Brain, Settings2, Plus, Minus, type LucideIcon } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type TimerMode = "focus30" | "focus60" | "shortBreak" | "custom";
+type TimerMode = "focus30" | "focus60" | "shortBreak";
 
 interface ModeConfig {
   label: string;
@@ -21,12 +20,10 @@ const MODES: Record<TimerMode, ModeConfig> = {
   focus30: { label: "30m Focus", minutes: 30, icon: Brain, color: "text-red-500", bgColor: "bg-red-500/10" },
   focus60: { label: "60m Focus", minutes: 60, icon: Brain, color: "text-indigo-500", bgColor: "bg-indigo-500/10" },
   shortBreak: { label: "Short Break", minutes: 5, icon: Coffee, color: "text-blue-500", bgColor: "bg-blue-500/10" },
-  custom: { label: "Custom", minutes: 15, icon: Settings2, color: "text-orange-500", bgColor: "bg-orange-500/10" },
 };
 
 export function PomodoroTimer() {
   const [mode, setMode] = useState<TimerMode>("focus30");
-  const [customMinutes, setCustomMinutes] = useState(15);
   const [timeLeft, setTimeLeft] = useState(MODES.focus30.minutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
@@ -34,10 +31,10 @@ export function PomodoroTimer() {
   const resetTimer = useCallback((newMode: TimerMode = mode) => {
     setIsActive(false);
     setMode(newMode);
-    const mins = newMode === "custom" ? customMinutes : MODES[newMode].minutes;
+    const mins = MODES[newMode].minutes;
     setTimeLeft(mins * 60);
     setShowCompletionModal(false);
-  }, [mode, customMinutes]);
+  }, [mode]);
 
   const playNotificationSound = useCallback(() => {
     try {
@@ -99,9 +96,9 @@ export function PomodoroTimer() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const currentTotalMinutes = mode === "custom" ? customMinutes : MODES[mode].minutes;
+  const currentTotalMinutes = MODES[mode].minutes;
   const totalSeconds = currentTotalMinutes * 60;
-  const percentageLeft = (timeLeft / totalSeconds) * 100;
+  const percentageCompleted = ((totalSeconds - timeLeft) / totalSeconds) * 100;
 
   const getCompletionMessage = () => {
     switch (mode) {
@@ -116,11 +113,6 @@ export function PomodoroTimer() {
           title: "Rest Up!",
           body: "Hope you enjoyed your break! Ready to tackle the next challenge?",
         };
-      case "custom":
-        return {
-          title: "Great Job!",
-          body: "You've successfully finished your custom session. Keep that momentum going!",
-        };
       default:
         return { title: "Well Done!", body: "Session completed successfully." };
     }
@@ -134,7 +126,7 @@ export function PomodoroTimer() {
         {/* Subtle Background Shade */}
         <div 
           className={cn("absolute bottom-0 left-0 right-0 z-0 transition-all duration-1000 ease-linear", MODES[mode].bgColor)}
-          style={{ height: `${percentageLeft}%` }}
+          style={{ height: `${percentageCompleted}%` }}
         />
 
         <div className="relative z-10">
@@ -162,62 +154,6 @@ export function PomodoroTimer() {
             </div>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4 py-8">
-            {mode === "custom" && !isActive && (
-              <div className="flex items-center gap-3 mb-2 animate-in fade-in slide-in-from-top-1 duration-300">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full shrink-0"
-                  onClick={() => {
-                    const val = Math.max(1, customMinutes - 1);
-                    setCustomMinutes(val);
-                    setTimeLeft(val * 60);
-                  }}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                
-                <Input
-                  type="number"
-                  min={1}
-                  max={120}
-                  className="w-16 h-10 text-center font-mono text-lg font-bold tabular-nums"
-                  value={customMinutes}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    // Allow typing freely but clamp on blur effectively by user logic if needed, 
-                    // but for smooth typing we just set state. 
-                    // We might want to clamp only if it exceeds reasonable bounds visually or logically.
-                    // For now, let's just limit max length or value roughly.
-                    if (val >= 0 && val <= 999) {
-                        setCustomMinutes(val);
-                        if (val > 0) setTimeLeft(val * 60);
-                    }
-                  }}
-                  onBlur={() => {
-                      let val = customMinutes;
-                      if (val < 1) val = 1;
-                      if (val > 120) val = 120;
-                      setCustomMinutes(val);
-                      setTimeLeft(val * 60);
-                  }}
-                />
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full shrink-0"
-                  onClick={() => {
-                    const val = Math.min(120, customMinutes + 1);
-                    setCustomMinutes(val);
-                    setTimeLeft(val * 60);
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
             <div className="text-8xl font-mono tracking-tighter tabular-nums font-bold text-foreground">
               {formatTime(timeLeft)}
             </div>
