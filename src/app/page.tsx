@@ -77,91 +77,76 @@ export default async function Home() {
   const minutes = totalMinutes % 60;
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-background to-muted p-4 md:p-8 flex flex-col items-center gap-4">
-      <div className="w-full max-w-5xl space-y-4">
+    <main className="min-h-screen bg-linear-to-br from-background to-muted p-6 flex flex-col gap-6">
+      <div className="w-full h-full space-y-6">
         {/* Header Section */}
-        <div className="relative flex justify-end items-center">
-          <ModeToggle />
+        <div className="flex justify-between items-start">
+          <div className="flex-1 flex justify-center">
+             <DigitalClock />
+          </div>
+          <div className="absolute right-6 top-6">
+            <ModeToggle />
+          </div>
         </div>
 
-        <Tabs defaultValue="today" className="w-full">
-          <div className="flex justify-center mb-6">
-            <TabsList>
-              <TabsTrigger value="today">Today's View</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+        <Tabs defaultValue="today" className="w-full h-full">
+          <div className="flex justify-center mb-8">
+            <TabsList className="scale-125 origin-top">
+              <TabsTrigger value="today" className="px-6 py-2">Today's Dashboard</TabsTrigger>
+              <TabsTrigger value="history" className="px-6 py-2">History & Trends</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="today" className="space-y-8">
-            <div className="flex justify-center">
-               <DigitalClock />
-            </div>
+          <TabsContent value="today" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-12 gap-8 h-full">
+               {/* Left Column: Stats & Brain Dump (3 cols) */}
+               <div className="col-span-12 lg:col-span-3 space-y-6">
+                  {/* Stats Stacked */}
+                  <Card className="bg-background/50 backdrop-blur-sm">
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col gap-1">
+                        <p className="text-sm font-medium text-muted-foreground">Today's Focus</p>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-bold tracking-tighter">
+                            {hours > 0 ? `${hours}h ` : ""}{minutes}m
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-            {/* Top Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              {/* Today's Focus */}
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-primary/10 rounded-full">
-                        <CalendarDays className="w-5 h-5 text-primary" />
+                  <Card className="bg-background/50 backdrop-blur-sm">
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-orange-500">
+                          <Flame className="w-5 h-5" />
+                          <p className="text-sm font-medium">Focus Streak</p>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-bold tracking-tighter text-orange-500">
+                            {streak}
+                          </span>
+                          <span className="text-sm text-muted-foreground uppercase">Days</span>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium leading-none">Today&apos;s Focus</p>
-                        <p className="text-xs text-muted-foreground">30m/60m blocks</p>
-                      </div>
-                    </div>
-                    <div className="flex items-baseline space-x-1">
-                      <span className="text-2xl font-bold tracking-tighter">
-                        {hours > 0 ? `${hours}h ` : ""}{minutes}m
-                      </span>
-                    </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="h-[400px] lg:h-auto lg:flex-1">
+                    <BrainDump />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Streak Counter */}
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-2 bg-orange-500/10 rounded-full">
-                        <Flame className="w-5 h-5 text-orange-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium leading-none">Focus Streak</p>
-                        <p className="text-xs text-muted-foreground">Consistent days</p>
-                      </div>
-                    </div>
-                    <div className="flex items-baseline space-x-1">
-                      <span className="text-2xl font-bold tracking-tighter text-orange-500">
-                        {streak}
-                      </span>
-                      <span className="text-xs text-muted-foreground uppercase">Days</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-               {/* Dashboard Main - Spans 2 cols */}
-               <div className="lg:col-span-2">
-                  <Dashboard todos={todos} />
                </div>
-               
-               {/* Sidebar - Spans 1 col */}
-               <div className="lg:col-span-1 space-y-6">
-                  <BrainDump />
-                  {/* Future: Quick Tip or Motivation Card */}
+
+               {/* Center Column: Main Dashboard (Timer + Todo) (9 cols) */}
+               <div className="col-span-12 lg:col-span-9 h-full">
+                  <Dashboard todos={todos} />
                </div>
             </div>
           </TabsContent>
 
           <TabsContent value="history" className="space-y-8">
-             <div className="grid grid-cols-1 gap-8">
-                <div className="h-[400px]">
+             <div className="grid grid-cols-1 gap-8 max-w-6xl mx-auto">
+                <div className="h-[500px]">
                   <HistoryChart todos={todos} />
                 </div>
                 <CalendarStats todos={todos} />

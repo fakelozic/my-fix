@@ -19,10 +19,10 @@ export function Dashboard({ todos }: DashboardProps) {
   const activeTask = todos.find((t) => t.id === activeTaskId);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full gap-6">
       {/* Active Task Hero Section */}
       {activeTask && (
-        <div className="animate-in slide-in-from-top-4 duration-300">
+        <div className="animate-in slide-in-from-top-4 duration-300 shrink-0">
           <Card className="border-primary/50 bg-primary/5 shadow-lg relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-primary animate-pulse" />
             <CardContent className="p-6 flex items-center justify-between gap-4">
@@ -49,15 +49,13 @@ export function Dashboard({ todos }: DashboardProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div className="flex flex-col gap-6 order-2 md:order-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-start">
+        <div className="flex flex-col gap-6 h-full">
           <PomodoroTimer />
-          
-          {/* Quick ADHD Tip or Motivation could go here, keeping it clean for now */}
         </div>
         
         <div className={cn(
-          "h-full min-h-[500px] transition-all duration-500 order-1 md:order-2",
+          "h-full transition-all duration-500",
           activeTaskId ? "opacity-90" : "opacity-100"
         )}>
           <TodoSection 

@@ -25,16 +25,9 @@ const MODES: Record<TimerMode, ModeConfig> = {
 export function PomodoroTimer() {
   const [mode, setMode] = useState<TimerMode>("focus30");
   const [timeLeft, setTimeLeft] = useState(MODES.focus30.minutes * 60);
-  const [isActive, setIsActive] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-
-  const resetTimer = useCallback((newMode: TimerMode = mode) => {
-    setIsActive(false);
-    setMode(newMode);
-    const mins = MODES[newMode].minutes;
-    setTimeLeft(mins * 60);
-    setShowCompletionModal(false);
-  }, [mode]);
 
   const playNotificationSound = useCallback(() => {
     try {
@@ -65,13 +58,13 @@ export function PomodoroTimer() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (isActive && timeLeft > 0) {
+    if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0 && isActive) {
+    } else if (timeLeft === 0 && isRunning) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsActive(false);
+      setIsRunning(false);
       setShowCompletionModal(true);
       playNotificationSound();
       if (Notification.permission === "granted") {
@@ -80,7 +73,7 @@ export function PomodoroTimer() {
     }
 
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, mode, playNotificationSound]);
+  }, [isRunning, timeLeft, mode, playNotificationSound]);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -88,7 +81,7 @@ export function PomodoroTimer() {
     }
   }, []);
 
-  const toggleTimer = () => setIsActive(!isActive);
+  const toggleTimer = () => setIsRunning(!isRunning);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -118,18 +111,76 @@ export function PomodoroTimer() {
     }
   };
 
+  const startSession = (selectedMode: TimerMode) => {
+    setMode(selectedMode);
+    const mins = MODES[selectedMode].minutes;
+    setTimeLeft(mins * 60);
+    setIsRunning(true);
+    setIsSessionActive(true);
+    setShowCompletionModal(false);
+  };
+
+  const stopSession = () => {
+    setIsRunning(false);
+    setIsSessionActive(false);
+  };
+
   const completion = getCompletionMessage();
+
+  if (!isSessionActive) {
+    return (
+      <Card className="w-full h-full min-h-[400px] flex flex-col justify-center p-8 gap-6 bg-background/50 backdrop-blur-sm border-2">
+        <div className="flex flex-col gap-4 flex-1 justify-center">
+            <Button 
+                variant="outline"
+                className="h-32 text-3xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                onClick={() => startSession("focus30")}
+            >
+                <div className="flex items-center gap-3">
+                    <Brain className="w-8 h-8 text-red-500 group-hover:scale-110 transition-transform" />
+                    30m Focus
+                </div>
+                <span className="text-sm font-normal text-muted-foreground">Quick session for momentum</span>
+            </Button>
+            
+            <Button 
+                variant="outline"
+                className="h-32 text-3xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                onClick={() => startSession("focus60")}
+            >
+                <div className="flex items-center gap-3">
+                    <Brain className="w-8 h-8 text-indigo-500 group-hover:scale-110 transition-transform" />
+                    60m Focus
+                </div>
+                 <span className="text-sm font-normal text-muted-foreground">Deep work block</span>
+            </Button>
+        </div>
+        
+        <div className="flex justify-center">
+             <Button 
+                variant="ghost" 
+                size="lg"
+                onClick={() => startSession("shortBreak")}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+             >
+                <Coffee className="w-4 h-4" />
+                Take a Short Break
+             </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <>
-      <Card className="relative w-full max-w-md mx-auto overflow-hidden bg-background/50 backdrop-blur-sm border-2 z-0">
+      <Card className="relative w-full h-full min-h-[400px] flex flex-col mx-auto overflow-hidden bg-background/50 backdrop-blur-sm border-2 z-0">
         {/* Subtle Background Shade */}
         <div 
           className={cn("absolute bottom-0 left-0 right-0 z-0 transition-all duration-1000 ease-linear", MODES[mode].bgColor)}
           style={{ height: `${percentageCompleted}%` }}
         />
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex-1 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xl font-bold flex items-center gap-2">
               {(() => {
@@ -138,69 +189,37 @@ export function PomodoroTimer() {
               })()}
               {MODES[mode].label}
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col gap-1">
-                <Button
-                  variant={mode === "focus30" ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  onClick={() => resetTimer("focus30")}
-                  className={cn("h-6 w-6 rounded-full", mode === "focus30" && "bg-muted")}
-                  title={MODES.focus30.label}
-                >
-                  <span className={cn("w-2 h-2 rounded-full bg-current", MODES.focus30.color)} />
-                </Button>
-                <Button
-                  variant={mode === "focus60" ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  onClick={() => resetTimer("focus60")}
-                  className={cn("h-6 w-6 rounded-full", mode === "focus60" && "bg-muted")}
-                  title={MODES.focus60.label}
-                >
-                  <span className={cn("w-2 h-2 rounded-full bg-current", MODES.focus60.color)} />
-                </Button>
-              </div>
-              <Button
-                variant={mode === "shortBreak" ? "secondary" : "ghost"}
-                size="icon-sm"
-                onClick={() => resetTimer("shortBreak")}
-                className={cn("rounded-full", mode === "shortBreak" && "bg-muted")}
-                title={MODES.shortBreak.label}
-              >
-                <span className={cn("w-2 h-2 rounded-full bg-current", MODES.shortBreak.color)} />
-              </Button>
-            </div>
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={stopSession}
+                title="Cancel Session"
+            >
+                <RotateCcw className="w-4 h-4" />
+            </Button>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4 py-8">
-            <div className="text-8xl font-mono tracking-tighter tabular-nums font-bold text-foreground">
+          <CardContent className="flex-1 flex flex-col items-center justify-center gap-8 py-8">
+            <div className="text-9xl font-mono tracking-tighter tabular-nums font-bold text-foreground">
               {formatTime(timeLeft)}
             </div>
             
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-6">
               <Button 
                 size="lg" 
-                className={cn("w-32 h-12 text-lg rounded-full shadow-lg transition-transform active:scale-95",
-                  isActive ? "bg-amber-500 hover:bg-amber-600" : "bg-primary hover:bg-primary/90"
+                className={cn("w-40 h-16 text-xl rounded-full shadow-lg transition-transform active:scale-95",
+                  isRunning ? "bg-amber-500 hover:bg-amber-600" : "bg-primary hover:bg-primary/90"
                 )}
                 onClick={toggleTimer}
               >
-                {isActive ? (
+                {isRunning ? (
                   <>
-                    <Pause className="mr-2 h-5 w-5" /> Pause
+                    <Pause className="mr-2 h-6 w-6" /> Pause
                   </>
                 ) : (
                   <>
-                    <Play className="mr-2 h-5 w-5" /> Start
+                    <Play className="mr-2 h-6 w-6" /> Resume
                   </>
                 )}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="icon-lg" 
-                onClick={() => resetTimer()}
-                className="rounded-full border-2"
-              >
-                <RotateCcw className="h-5 w-5" />
               </Button>
             </div>
           </CardContent>
