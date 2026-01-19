@@ -54,12 +54,15 @@ function calculateStreak(todos: any[]) {
 
 export default async function Home() {
   const todos = await getTodos();
-  const streak = calculateStreak(todos);
+  const dailyTodos = todos.filter(t => t.type === 'daily');
+  const kanbanTodos = todos.filter(t => t.type === 'kanban');
+
+  const streak = calculateStreak(dailyTodos);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  const completedToday = todos.filter(
+  const completedToday = dailyTodos.filter(
     (t) =>
       t.completed &&
       t.completedAt &&
@@ -69,9 +72,6 @@ export default async function Home() {
   const totalMinutes = completedToday.reduce((acc, t) => acc + (t.duration || 30), 0);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-
-  const dailyTodos = todos.filter(t => t.type === 'daily');
-  const kanbanTodos = todos.filter(t => t.type === 'kanban');
 
   return (
     <main className="min-h-screen bg-linear-to-br from-background to-muted p-6 flex flex-col gap-6">
@@ -151,9 +151,9 @@ export default async function Home() {
           <TabsContent value="history" className="space-y-8">
              <div className="grid grid-cols-1 gap-8 max-w-6xl mx-auto">
                 <div className="h-[350px]">
-                  <HistoryChart todos={todos} />
+                  <HistoryChart todos={dailyTodos} />
                 </div>
-                <CalendarStats todos={todos} />
+                <CalendarStats todos={dailyTodos} />
              </div>
           </TabsContent>
 

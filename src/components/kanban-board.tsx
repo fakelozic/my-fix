@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Todo } from "@/db/schema";
 import { updateTodoStatus, addTodo } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, ArrowRight, Circle, Clock, CheckCircle2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DndContext, DragEndEvent, useDraggable, useDroppable } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useDraggable, useDroppable } from "@dnd-kit/core";
 
 interface KanbanBoardProps {
   todos: Todo[];
@@ -20,29 +20,17 @@ const COLUMNS = [
   { id: "done", label: "Done", icon: CheckCircle2, color: "text-green-500" },
 ];
 
-function DraggableCard({ todo, moveTask, colId }: { todo: Todo, moveTask: any, colId: string }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: todo.id.toString(),
-    data: { colId },
-  });
-  
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: isDragging ? 50 : 0,
-    opacity: isDragging ? 0.8 : 1,
-  } : undefined;
-
+function TaskCard({ todo, moveTask, colId, isOverlay, isDragging }: { todo: Todo, moveTask?: any, colId?: string, isOverlay?: boolean, isDragging?: boolean }) {
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="touch-none">
-        <Card className={cn("bg-background shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing", isDragging && "shadow-xl ring-2 ring-primary/20")}>
-            <CardContent className="p-3 flex flex-col gap-2">
-                <p className="text-sm font-medium leading-snug">{todo.text}</p>
-                <div className="flex items-center justify-between mt-2">
-                    <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {todo.duration || 30}m
-                    </span>
+    <Card className={cn("bg-background shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing", isDragging && "opacity-50", isOverlay && "shadow-xl ring-2 ring-primary/20 opacity-100 cursor-grabbing")}>
+        <CardContent className="p-3 flex flex-col gap-2">
+            <p className="text-sm font-medium leading-snug">{todo.text}</p>
+            <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    {todo.duration || 30}m
+                </span>
+                {!isOverlay && moveTask && colId && (
                     <div className="flex gap-1" onPointerDown={(e) => e.stopPropagation()}> 
-                        {/* Stop propagation to prevent drag start on button click */}
                         <Button
                             variant="ghost"
                             size="icon-sm"
@@ -62,9 +50,33 @@ function DraggableCard({ todo, moveTask, colId }: { todo: Todo, moveTask: any, c
                             <ArrowRight className="w-3 h-3" />
                         </Button>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                )}
+            </div>
+        </CardContent>
+    </Card>
+  );
+}
+
+function DraggableCard({ todo, moveTask, colId }: { todo: Todo, moveTask: any, colId: string }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: todo.id.toString(),
+    data: { colId, todo },
+  });
+  
+  // We don't apply transform here to the main element to avoid layout shift when using DragOverlay usually,
+  // but standard dnd-kit practice without Sortable is to keep it or hide it.
+  // If we want the item to "disappear" from list and appear in overlay, we hide it or set opacity 0.
+  // But usually we want it dimmed.
+  // Actually, if we use DragOverlay, we normally hide the original item or make it very faint.
+  
+  const style = transform ? {
+    // transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, // Use DragOverlay instead
+    opacity: isDragging ? 0 : 1, // Hide original
+  } : undefined;
+
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="touch-none">
+        <TaskCard todo={todo} moveTask={moveTask} colId={colId} isDragging={isDragging} />
     </div>
   );
 }
@@ -111,6 +123,8 @@ function DroppableColumn({ col, todos, moveTask }: { col: typeof COLUMNS[0], tod
 
 export function KanbanBoard({ todos }: KanbanBoardProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
 
   const getColumnTodos = (status: string) => {
     if (status === "todo") {
@@ -136,8 +150,16 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
     }
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+    setActiveTodo(event.active.data.current?.todo);
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
+    setActiveTodo(null);
+
     if (!over) return;
 
     const todoId = parseInt(active.id as string);
@@ -150,7 +172,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
   };
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex flex-col h-full gap-6">
         <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold tracking-tight">Project Board</h2>
@@ -181,6 +203,9 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
             ))}
         </div>
         </div>
+        <DragOverlay>
+            {activeTodo ? <TaskCard todo={activeTodo} isOverlay /> : null}
+        </DragOverlay>
     </DndContext>
   );
 }
