@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { addTodo, toggleTodo, deleteTodo } from "@/app/actions";
 import { Todo } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Check, Trash2, Plus, Target } from "lucide-react";
+import { Check, Trash2, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TodoSectionProps {
@@ -17,7 +17,6 @@ interface TodoSectionProps {
 
 export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionProps) {
   const formRef = useRef<HTMLFormElement>(null);
-  const [duration, setDuration] = useState<number>(30);
 
   return (
     <Card className="w-full h-full flex flex-col bg-background/50 backdrop-blur-sm">
@@ -33,44 +32,23 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
           action={async (formData) => {
             await addTodo(formData);
             formRef.current?.reset();
-            setDuration(30); // Reset to default
           }}
           ref={formRef}
-          className="flex flex-col gap-2"
+          className="flex gap-2"
         >
-          <div className="flex gap-2">
-            <Input
-              name="text"
-              placeholder="Add a daily task..."
-              className="flex-1"
-              autoComplete="off"
-            />
-            <input type="hidden" name="duration" value={duration} />
-            <input type="hidden" name="type" value="daily" />
-            <Button type="submit" size="icon">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="flex gap-2">
-             <Button
-                type="button"
-                variant={duration === 30 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDuration(30)}
-                className="flex-1 text-xs h-7"
-             >
-                30 Min
-             </Button>
-             <Button
-                type="button"
-                variant={duration === 60 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDuration(60)}
-                className="flex-1 text-xs h-7"
-             >
-                60 Min
-             </Button>
-          </div>
+          <Input
+            name="text"
+            placeholder="Add a daily task..."
+            className="flex-1"
+            autoComplete="off"
+          />
+          <input type="hidden" name="type" value="daily" />
+          <Button type="submit" name="duration" value="30" size="sm" variant="outline">
+            30m
+          </Button>
+          <Button type="submit" name="duration" value="60" size="sm" variant="outline">
+            60m
+          </Button>
         </form>
 
         <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 min-h-[200px]">
