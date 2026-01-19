@@ -138,19 +138,36 @@ export function PomodoroTimer() {
               })()}
               {MODES[mode].label}
             </CardTitle>
-            <div className="flex gap-1">
-              {(Object.keys(MODES) as TimerMode[]).map((m) => (
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-1">
                 <Button
-                  key={m}
-                  variant={mode === m ? "secondary" : "ghost"}
+                  variant={mode === "focus30" ? "secondary" : "ghost"}
                   size="icon-sm"
-                  onClick={() => resetTimer(m)}
-                  className={cn("rounded-full", mode === m && "bg-muted")}
-                  title={MODES[m].label}
+                  onClick={() => resetTimer("focus30")}
+                  className={cn("h-6 w-6 rounded-full", mode === "focus30" && "bg-muted")}
+                  title={MODES.focus30.label}
                 >
-                  <span className={cn("w-2 h-2 rounded-full bg-current", MODES[m].color)} />
+                  <span className={cn("w-2 h-2 rounded-full bg-current", MODES.focus30.color)} />
                 </Button>
-              ))}
+                <Button
+                  variant={mode === "focus60" ? "secondary" : "ghost"}
+                  size="icon-sm"
+                  onClick={() => resetTimer("focus60")}
+                  className={cn("h-6 w-6 rounded-full", mode === "focus60" && "bg-muted")}
+                  title={MODES.focus60.label}
+                >
+                  <span className={cn("w-2 h-2 rounded-full bg-current", MODES.focus60.color)} />
+                </Button>
+              </div>
+              <Button
+                variant={mode === "shortBreak" ? "secondary" : "ghost"}
+                size="icon-sm"
+                onClick={() => resetTimer("shortBreak")}
+                className={cn("rounded-full", mode === "shortBreak" && "bg-muted")}
+                title={MODES.shortBreak.label}
+              >
+                <span className={cn("w-2 h-2 rounded-full bg-current", MODES.shortBreak.color)} />
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4 py-8">

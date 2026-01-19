@@ -4,6 +4,7 @@ import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
 import { BrainDump } from "@/components/brain-dump";
 import { ModeToggle } from "@/components/mode-toggle";
+import { DigitalClock } from "@/components/digital-clock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Flame } from "lucide-react";
@@ -92,6 +93,10 @@ export default async function Home() {
           </div>
 
           <TabsContent value="today" className="space-y-8">
+            <div className="flex justify-center">
+               <DigitalClock />
+            </div>
+
             {/* Top Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
               {/* Today's Focus */}
