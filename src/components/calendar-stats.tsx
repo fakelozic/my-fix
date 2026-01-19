@@ -79,8 +79,8 @@ export function CalendarStats({ todos }: CalendarStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-1 text-center mb-2">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
-              <div key={d} className="text-xs text-muted-foreground font-medium py-1">{d}</div>
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+              <div key={i} className="text-xs text-muted-foreground font-medium py-1">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
