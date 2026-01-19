@@ -67,12 +67,12 @@ export function StickyNotes() {
           <Plus className="w-3 h-3" /> New Note
         </Button>
       </CardHeader>
-      <CardContent className="px-0 flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <CardContent className="p-4 flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4">
           {notes.map((note) => (
             <div 
               key={note.id} 
-              className={`relative p-3 rounded-lg border shadow-sm min-h-[150px] flex flex-col group transition-all hover:scale-[1.02] ${note.color}`}
+              className={`relative p-3 rounded-lg border shadow-sm min-h-[150px] flex flex-col group transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:z-10 ${note.color}`}
             >
               <Button
                 variant="ghost"
