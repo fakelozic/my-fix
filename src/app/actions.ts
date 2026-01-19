@@ -12,6 +12,7 @@ export async function getTodos() {
 export async function addTodo(formData: FormData) {
   const text = formData.get("text") as string;
   const duration = parseInt(formData.get("duration") as string) || 30;
+  const type = (formData.get("type") as string) || "daily";
   
   if (!text || text.trim().length === 0) return;
 
@@ -19,6 +20,7 @@ export async function addTodo(formData: FormData) {
     text,
     duration,
     status: "todo",
+    type,
     completed: false,
     createdAt: new Date(),
   });

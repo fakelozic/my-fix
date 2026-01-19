@@ -20,11 +20,11 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
   const [duration, setDuration] = useState<number>(30);
 
   return (
-    <Card className="w-full max-w-md mx-auto h-full flex flex-col bg-background/50 backdrop-blur-sm">
+    <Card className="w-full h-full flex flex-col bg-background/50 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Check className="w-5 h-5 text-primary" />
-          Tasks
+          Daily Tasks
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
@@ -41,11 +41,12 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
           <div className="flex gap-2">
             <Input
               name="text"
-              placeholder="Add a new task..."
+              placeholder="Add a daily task..."
               className="flex-1"
               autoComplete="off"
             />
             <input type="hidden" name="duration" value={duration} />
+            <input type="hidden" name="type" value="daily" />
             <Button type="submit" size="icon">
               <Plus className="w-4 h-4" />
             </Button>

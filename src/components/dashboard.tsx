@@ -49,16 +49,16 @@ export function Dashboard({ todos }: DashboardProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-start">
-        <div className="flex flex-col gap-6 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full items-start">
+        <div className="flex flex-col gap-6 h-full col-span-1">
           <PomodoroTimer />
         </div>
         
         <div className={cn(
-          "h-full transition-all duration-500",
+          "h-full transition-all duration-500 col-span-1 lg:col-span-2",
           activeTaskId ? "opacity-90" : "opacity-100"
         )}>
-          <TodoSection 
+          <TodoSection  
             todos={todos} 
             activeTaskId={activeTaskId} 
             onFocusTask={setActiveTaskId} 

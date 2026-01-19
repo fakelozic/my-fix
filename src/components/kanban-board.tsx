@@ -1,10 +1,12 @@
 "use client";
 
+import { useRef } from "react";
 import { Todo } from "@/db/schema";
-import { updateTodoStatus } from "@/app/actions";
+import { updateTodoStatus, addTodo } from "@/app/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Circle, Clock, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, ArrowRight, Circle, Clock, CheckCircle2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface KanbanBoardProps {
@@ -18,7 +20,8 @@ const COLUMNS = [
 ];
 
 export function KanbanBoard({ todos }: KanbanBoardProps) {
-  
+  const formRef = useRef<HTMLFormElement>(null);
+
   const getColumnTodos = (status: string) => {
     // Handle legacy data or default
     if (status === "todo") {
@@ -46,7 +49,25 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
   };
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-6">
+      <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold tracking-tight">Project Board</h2>
+          <form
+            action={async (formData) => {
+                await addTodo(formData);
+                formRef.current?.reset();
+            }}
+            ref={formRef}
+            className="flex gap-2 w-full max-w-sm"
+          >
+            <Input name="text" placeholder="Add a project task..." className="bg-background" autoComplete="off" />
+            <input type="hidden" name="type" value="kanban" />
+            <Button type="submit">
+                <Plus className="w-4 h-4 mr-2" /> Add
+            </Button>
+          </form>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-h-[500px]">
         {COLUMNS.map((col) => {
           const colTodos = getColumnTodos(col.id);

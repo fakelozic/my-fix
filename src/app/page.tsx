@@ -70,21 +70,19 @@ export default async function Home() {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
+  const dailyTodos = todos.filter(t => t.type === 'daily');
+  const kanbanTodos = todos.filter(t => t.type === 'kanban');
+
   return (
     <main className="min-h-screen bg-linear-to-br from-background to-muted p-6 flex flex-col gap-6">
       <div className="w-full h-full space-y-6">
-        {/* Header Section */}
-        <div className="flex justify-between items-start">
-          <div className="flex-1 flex justify-center">
-             <DigitalClock />
-          </div>
-          <div className="absolute right-6 top-6">
+        {/* Global Header with Mode Toggle */}
+        <div className="absolute right-6 top-6 z-50">
             <ModeToggle />
-          </div>
         </div>
 
-        <Tabs defaultValue="today" className="w-full h-full">
-          <div className="flex justify-center mb-8">
+        <Tabs defaultValue="today" className="w-full h-full flex flex-col">
+          <div className="flex justify-center mb-6 shrink-0">
             <TabsList>
               <TabsTrigger value="today">Today's Dashboard</TabsTrigger>
               <TabsTrigger value="history">History & Trends</TabsTrigger>
@@ -92,12 +90,10 @@ export default async function Home() {
             </TabsList>
           </div>
 
-          <TabsContent value="today" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-12 gap-8 h-full">
-               {/* Left Column: Stats & Sticky Notes (3 cols) */}
-               <div className="col-span-12 lg:col-span-3 space-y-6 flex flex-col">
-                  {/* Stats Stacked */}
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+          <TabsContent value="today" className="space-y-6 flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Top Bar: Stats & Clock */}
+            <div className="grid grid-cols-12 gap-6 shrink-0">
+                <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
                     <Card className="bg-background/50 backdrop-blur-sm">
                         <CardContent className="pt-6">
                         <div className="flex flex-col gap-1">
@@ -127,16 +123,25 @@ export default async function Home() {
                         </div>
                         </CardContent>
                     </Card>
-                  </div>
+                </div>
+                
+                <div className="col-span-12 lg:col-span-8">
+                    <div className="h-full flex items-center justify-center bg-background/30 rounded-xl border backdrop-blur-sm p-4">
+                        <DigitalClock />
+                    </div>
+                </div>
+            </div>
 
-                  <div className="h-[400px] lg:flex-1 min-h-[300px]">
-                    <StickyNotes />
-                  </div>
+            {/* Main Content Area */}
+            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
+               {/* Left Sidebar: Sticky Notes (3 cols) */}
+               <div className="col-span-12 lg:col-span-3 h-full min-h-[300px]">
+                  <StickyNotes />
                </div>
 
-               {/* Center Column: Main Dashboard (Timer + Todo) (9 cols) */}
-               <div className="col-span-12 lg:col-span-9 h-full">
-                  <Dashboard todos={todos} />
+               {/* Main Dashboard (9 cols) */}
+               <div className="col-span-12 lg:col-span-9 h-full min-h-[500px]">
+                  <Dashboard todos={dailyTodos} />
                </div>
             </div>
           </TabsContent>
@@ -151,7 +156,7 @@ export default async function Home() {
           </TabsContent>
 
           <TabsContent value="kanban" className="space-y-8 h-full">
-              <KanbanBoard todos={todos} />
+              <KanbanBoard todos={kanbanTodos} />
           </TabsContent>
         </Tabs>
       </div>
