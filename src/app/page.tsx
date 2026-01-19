@@ -2,6 +2,7 @@ import { getTodos } from "@/app/actions";
 import { PomodoroTimer } from "@/components/pomodoro-timer";
 import { TodoSection } from "@/components/todo-section";
 import { CalendarStats } from "@/components/calendar-stats";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -12,14 +13,20 @@ export default async function Home() {
     <main className="min-h-screen bg-linear-to-br from-background to-muted p-4 md:p-8 flex flex-col items-center gap-8">
       <div className="w-full max-w-5xl space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+        <div className="relative flex flex-col md:flex-row gap-6 justify-center items-center">
           <div className="space-y-2 text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-clip-text text-transparent bg-linear-to-r from-primary to-primary/60">
+            <h1 className="text-3xl font-extrabold tracking-tight lg:text-4xl bg-clip-text text-transparent bg-linear-to-r from-primary to-primary/60">
               FocusFlow
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base">
               Stay productive, one interval at a time.
             </p>
+          </div>
+          <div className="absolute right-0 top-0 hidden md:block">
+            <ModeToggle />
+          </div>
+           <div className="md:hidden">
+            <ModeToggle />
           </div>
         </div>
 
