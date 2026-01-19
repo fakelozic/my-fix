@@ -73,7 +73,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
           </div>
         </form>
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-2 min-h-[200px]">
+        <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 min-h-[200px]">
           {todos.length === 0 ? (
             <div className="text-center text-muted-foreground py-8 text-sm">
               No tasks yet. Add one to get started!

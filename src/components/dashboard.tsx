@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Todo } from "@/db/schema";
-import { PomodoroTimer } from "@/components/pomodoro-timer";
+import { PomodoroTimer, PomodoroTimerRef } from "@/components/pomodoro-timer";
 import { TodoSection } from "@/components/todo-section";
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, X } from "lucide-react";
@@ -15,8 +15,18 @@ interface DashboardProps {
 
 export function Dashboard({ todos }: DashboardProps) {
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
+  const timerRef = useRef<PomodoroTimerRef>(null);
 
   const activeTask = todos.find((t) => t.id === activeTaskId);
+
+  useEffect(() => {
+    if (activeTask) {
+      const mode = activeTask.duration === 60 ? "focus60" : "focus30";
+      timerRef.current?.startSession(mode);
+    } else {
+      timerRef.current?.stopSession();
+    }
+  }, [activeTask]);
 
   return (
     <div className="flex flex-col h-full gap-6">
@@ -51,7 +61,7 @@ export function Dashboard({ todos }: DashboardProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full items-start">
         <div className="flex flex-col gap-6 h-full col-span-1">
-          <PomodoroTimer />
+          <PomodoroTimer ref={timerRef} />
         </div>
         
         <div className={cn(

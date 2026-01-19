@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play, Pause, RotateCcw, Coffee, Brain, type LucideIcon } from "lucide-react";
@@ -16,18 +16,42 @@ interface ModeConfig {
   bgColor: string;
 }
 
+export interface PomodoroTimerRef {
+  startSession: (mode: TimerMode) => void;
+  stopSession: () => void;
+}
+
 const MODES: Record<TimerMode, ModeConfig> = {
   focus30: { label: "30m Focus", minutes: 30, icon: Brain, color: "text-red-500", bgColor: "bg-red-500/10" },
   focus60: { label: "60m Focus", minutes: 60, icon: Brain, color: "text-indigo-500", bgColor: "bg-indigo-500/10" },
   shortBreak: { label: "Short Break", minutes: 5, icon: Coffee, color: "text-blue-500", bgColor: "bg-blue-500/10" },
 };
 
-export function PomodoroTimer() {
+export const PomodoroTimer = forwardRef<PomodoroTimerRef>((props, ref) => {
   const [mode, setMode] = useState<TimerMode>("focus30");
   const [timeLeft, setTimeLeft] = useState(MODES.focus30.minutes * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  const startSession = useCallback((selectedMode: TimerMode) => {
+    setMode(selectedMode);
+    const mins = MODES[selectedMode].minutes;
+    setTimeLeft(mins * 60);
+    setIsRunning(true);
+    setIsSessionActive(true);
+    setShowCompletionModal(false);
+  }, []);
+
+  const stopSession = useCallback(() => {
+    setIsRunning(false);
+    setIsSessionActive(false);
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    startSession,
+    stopSession
+  }));
 
   const playNotificationSound = useCallback(() => {
     try {
@@ -109,20 +133,6 @@ export function PomodoroTimer() {
       default:
         return { title: "Well Done!", body: "Session completed successfully." };
     }
-  };
-
-  const startSession = (selectedMode: TimerMode) => {
-    setMode(selectedMode);
-    const mins = MODES[selectedMode].minutes;
-    setTimeLeft(mins * 60);
-    setIsRunning(true);
-    setIsSessionActive(true);
-    setShowCompletionModal(false);
-  };
-
-  const stopSession = () => {
-    setIsRunning(false);
-    setIsSessionActive(false);
   };
 
   const completion = getCompletionMessage();
@@ -250,4 +260,5 @@ export function PomodoroTimer() {
       )}
     </>
   );
-}
+});
+PomodoroTimer.displayName = "PomodoroTimer";
