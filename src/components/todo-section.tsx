@@ -76,31 +76,31 @@ export function TodoSection({ todos }: { todos: Todo[] }) {
               <div
                 key={todo.id}
                 className={cn(
-                  "group flex items-center justify-between p-3 rounded-lg border bg-card hover:shadow-sm transition-all",
+                  "group flex items-center justify-between p-2 rounded-md border bg-card hover:shadow-sm transition-all",
                   todo.completed && "opacity-60 bg-muted/50"
                 )}
               >
-                <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                <div className="flex items-center gap-2 flex-1 overflow-hidden">
                   <button
                     onClick={() => toggleTodo(todo.id, !todo.completed)}
                     className={cn(
-                      "flex-shrink-0 w-5 h-5 rounded-full border border-primary flex items-center justify-center transition-colors",
+                      "flex-shrink-0 w-4 h-4 rounded-full border border-primary flex items-center justify-center transition-colors",
                       todo.completed
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-primary/10"
                     )}
                   >
-                    {todo.completed && <Check className="w-3 h-3" />}
+                    {todo.completed && <Check className="w-2.5 h-2.5" />}
                   </button>
                   <span
                     className={cn(
-                      "truncate transition-all flex-1",
+                      "truncate transition-all flex-1 text-sm",
                       todo.completed && "line-through text-muted-foreground"
                     )}
                   >
                     {todo.text}
                   </span>
-                  <div className="flex items-center text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded border mr-2">
+                  <div className="flex items-center text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded mr-1">
                     {todo.duration || 30}m
                   </div>
                 </div>
