@@ -48,8 +48,8 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             name="duration" 
             value="30" 
             size="sm" 
-            variant="outline" 
-            className="text-red-600 bg-red-50 border-red-200 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800 transition-colors"
+            variant="secondary"
+            className="h-8"
           >
             30m
           </Button>
@@ -58,7 +58,8 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             name="duration" 
             value="60" 
             size="sm" 
-            className="bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+            variant="default"
+            className="h-8"
           >
             60m
           </Button>
