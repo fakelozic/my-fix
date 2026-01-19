@@ -154,18 +154,18 @@ export function PomodoroTimer() {
                 </div>
                  <span className="text-sm font-normal text-muted-foreground">Deep work block</span>
             </Button>
-        </div>
-        
-        <div className="flex justify-center">
-             <Button 
-                variant="ghost" 
-                size="lg"
+
+            <Button 
+                variant="outline"
+                className="h-24 text-2xl font-bold flex flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                 onClick={() => startSession("shortBreak")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
-             >
-                <Coffee className="w-4 h-4" />
-                Take a Short Break
-             </Button>
+            >
+                <div className="flex items-center gap-2">
+                    <Coffee className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />
+                    Short Break
+                </div>
+                 <span className="text-xs font-normal text-muted-foreground">5m rest interval</span>
+            </Button>
         </div>
       </Card>
     );
