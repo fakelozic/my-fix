@@ -2,11 +2,11 @@
 
 import { useRef } from "react";
 import { Todo } from "@/db/schema";
-import { updateTodoStatus, addTodo } from "@/app/actions";
+import { updateTodoStatus, addTodo, deleteTodo } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Circle, Clock, CheckCircle2, Plus, MoreHorizontal } from "lucide-react";
+import { Circle, Clock, CheckCircle2, Plus, MoreHorizontal, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -105,6 +105,13 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                                                     Move to {targetCol.label}
                                                 </DropdownMenuItem>
                                             ))}
+                                            <DropdownMenuItem 
+                                                className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                                                onClick={() => deleteTodo(todo.id)}
+                                            >
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Delete
+                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>

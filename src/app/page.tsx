@@ -4,6 +4,7 @@ import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
 import { StickyNotes } from "@/components/sticky-notes";
+import { QuotesWidget } from "@/components/quotes-widget";
 import { KanbanBoard } from "@/components/kanban-board";
 import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock, CurrentDate } from "@/components/digital-clock";
@@ -85,8 +86,8 @@ export default async function Home() {
             <CurrentDate />
             <TabsList>
               <TabsTrigger value="today">Today&apos;s Dashboard</TabsTrigger>
-              <TabsTrigger value="history">History & Trends</TabsTrigger>
               <TabsTrigger value="kanban">Kanban Board</TabsTrigger>
+              <TabsTrigger value="history">History & Trends</TabsTrigger>
             </TabsList>
             <div className="w-[200px] hidden lg:block" /> {/* Spacer */}
           </div>
@@ -135,14 +136,19 @@ export default async function Home() {
 
             {/* Main Content Area */}
             <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
-               {/* Left Sidebar: Sticky Notes (4 cols - expanded) */}
+               {/* Left Sidebar: Sticky Notes (4 cols) */}
                <div className="col-span-12 lg:col-span-4 h-full min-h-[300px]">
                   <StickyNotes />
                </div>
 
-               {/* Main Dashboard (8 cols - reduced) */}
-               <div className="col-span-12 lg:col-span-8 h-full min-h-[500px]">
-                  <Dashboard todos={dailyTodos} />
+               {/* Main Dashboard (8 cols) */}
+               <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+                  <div className="flex-1 min-h-[500px]">
+                     <Dashboard todos={dailyTodos} />
+                  </div>
+                  <div className="shrink-0 h-auto">
+                     <QuotesWidget />
+                  </div>
                </div>
             </div>
           </TabsContent>
