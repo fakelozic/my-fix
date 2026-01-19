@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Quote, Plus, X } from "lucide-react";
 
-const DEFAULT_QUOTES = [
-  "The only way to do great work is to love what you do.",
-  "Focus is about saying no.",
-  "Your future is created by what you do today, not tomorrow.",
-  "Productivity is never an accident. It is always the result of a commitment to excellence.",
-  "It's not that I'm so smart, it's just that I stay with problems longer.",
-];
+const DEFAULT_QUOTES: string[] = [];
 
 export function QuotesWidget() {
   const [quotes, setQuotes] = useState<string[]>([]);
@@ -21,14 +15,17 @@ export function QuotesWidget() {
   const [newQuote, setNewQuote] = useState("");
 
   const refreshDisplay = (sourceQuotes: string[]) => {
-    if (sourceQuotes.length === 0) return;
+    if (sourceQuotes.length === 0) {
+        setDisplayQuotes([]);
+        return;
+    }
     const shuffled = [...sourceQuotes].sort(() => 0.5 - Math.random());
     setDisplayQuotes(shuffled.slice(0, 2));
   };
 
   useEffect(() => {
     const saved = localStorage.getItem("focusflow-quotes");
-    const loadedQuotes = saved ? JSON.parse(saved) : DEFAULT_QUOTES;
+    const loadedQuotes = saved ? JSON.parse(saved) : [];
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuotes(loadedQuotes);
     
@@ -80,14 +77,21 @@ export function QuotesWidget() {
             </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayQuotes.map((q, i) => (
-                <div key={i} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-border/50 italic text-muted-foreground relative">
-                    <span className="text-3xl text-primary/20 absolute -top-2 -left-2">“</span>
-                    <p className="z-10 relative">{q}</p>
-                </div>
-            ))}
-        </div>
+        {displayQuotes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-4 text-muted-foreground opacity-50">
+                <p className="text-2xl font-serif">...</p>
+                <p className="text-xs">Add a quote for inspiration</p>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {displayQuotes.map((q, i) => (
+                    <div key={i} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-border/50 italic text-muted-foreground relative">
+                        <span className="text-3xl text-primary/20 absolute -top-2 -left-2">“</span>
+                        <p className="z-10 relative">{q}</p>
+                    </div>
+                ))}
+            </div>
+        )}
       </CardContent>
     </Card>
   );
