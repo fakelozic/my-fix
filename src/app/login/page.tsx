@@ -23,8 +23,23 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-sm">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Subtle background decoration */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]" />
+      </div>
+
+      <div className="mb-8 text-center relative z-10">
+        <h1 className="text-6xl font-black tracking-tighter text-primary italic">
+          my-fix
+        </h1>
+        <p className="text-muted-foreground mt-2 font-medium tracking-wide uppercase text-xs">
+          Organize. Focus. Achieve.
+        </p>
+      </div>
+
+      <Card className="w-full max-w-sm relative z-10 backdrop-blur-sm bg-card/80">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>

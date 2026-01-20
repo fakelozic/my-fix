@@ -65,6 +65,18 @@ export function QuotesWidget() {
 
   useEffect(() => {
     fetchDaily();
+
+    // Check every minute if the hour has changed to rotate quotes
+    let lastHour = new Date().getHours();
+    const interval = setInterval(() => {
+        const currentHour = new Date().getHours();
+        if (currentHour !== lastHour) {
+            lastHour = currentHour;
+            fetchDaily();
+        }
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

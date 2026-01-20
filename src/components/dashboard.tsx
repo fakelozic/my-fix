@@ -29,7 +29,7 @@ export function Dashboard({ todos }: DashboardProps) {
   }, [activeTask]);
 
   return (
-    <div className="flex flex-col h-full gap-6">
+    <div className="flex flex-col h-full gap-4">
       {/* Active Task Hero Section */}
       {activeTask && (
         <div className="animate-in slide-in-from-top-4 duration-300 shrink-0">
@@ -59,8 +59,8 @@ export function Dashboard({ todos }: DashboardProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full items-start">
-        <div className="flex flex-col gap-6 h-full col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full items-start">
+        <div className="flex flex-col gap-4 h-full col-span-1">
           <PomodoroTimer ref={timerRef} />
         </div>
         

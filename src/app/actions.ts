@@ -5,27 +5,32 @@ import { todos, quotes, kanbanTasks } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
+import { encrypt, decrypt } from "@/lib/encryption";
 
 export async function getTodos() {
   const session = await getSession();
   if (!session?.user?.id) return [];
   
-  return await db
+  const results = await db
     .select()
     .from(todos)
     .where(eq(todos.userId, session.user.id))
     .orderBy(todos.createdAt);
+
+  return results.map(item => ({ ...item, text: decrypt(item.text) }));
 }
 
 export async function getKanbanTasks() {
   const session = await getSession();
   if (!session?.user?.id) return [];
 
-  return await db
+  const results = await db
     .select()
     .from(kanbanTasks)
     .where(eq(kanbanTasks.userId, session.user.id))
     .orderBy(kanbanTasks.createdAt);
+
+  return results.map(item => ({ ...item, text: decrypt(item.text) }));
 }
 
 export async function addTodo(formData: FormData) {
@@ -40,7 +45,7 @@ export async function addTodo(formData: FormData) {
 
   try {
     const [newTodo] = await db.insert(todos).values({
-      text,
+      text: encrypt(text),
       duration,
       status: "todo",
       type,
@@ -50,7 +55,7 @@ export async function addTodo(formData: FormData) {
     }).returning();
 
     revalidatePath("/");
-    return { data: newTodo };
+    return { data: { ...newTodo, text: decrypt(newTodo.text) } };
   } catch {
     return { error: "Failed to add task" };
   }
@@ -66,14 +71,14 @@ export async function addKanbanTask(formData: FormData) {
 
   try {
     const [newTask] = await db.insert(kanbanTasks).values({
-      text,
+      text: encrypt(text),
       status: "todo",
       createdAt: new Date(),
       userId: session.user.id,
     }).returning();
 
     revalidatePath("/");
-    return { data: newTask };
+    return { data: { ...newTask, text: decrypt(newTask.text) } };
   } catch {
     return { error: "Failed to add kanban task" };
   }
@@ -170,24 +175,40 @@ export async function getDailyQuotes() {
   const session = await getSession();
   if (!session?.user?.id) return [];
 
-  // Get 2 random quotes for this user
-  return await db
+  // Get all quotes for the user to pick deterministically based on the hour
+  const allUserQuotes = await db
     .select()
     .from(quotes)
     .where(eq(quotes.userId, session.user.id))
-    .orderBy(sql`RANDOM()`)
-    .limit(2);
+    .orderBy(quotes.id);
+
+  if (allUserQuotes.length === 0) return [];
+  
+  // Decrypt all quotes first
+  const decryptedQuotes = allUserQuotes.map(q => ({ ...q, text: decrypt(q.text) }));
+  
+  if (decryptedQuotes.length <= 2) return decryptedQuotes;
+
+  // Use the current hour since epoch to pick indices
+  const hourIndex = Math.floor(Date.now() / (1000 * 60 * 60));
+  
+  const firstIndex = hourIndex % decryptedQuotes.length;
+  const secondIndex = (hourIndex + 1) % decryptedQuotes.length;
+
+  return [decryptedQuotes[firstIndex], decryptedQuotes[secondIndex]];
 }
 
 export async function getQuotes() {
   const session = await getSession();
   if (!session?.user?.id) return [];
 
-  return await db
+  const results = await db
     .select()
     .from(quotes)
     .where(eq(quotes.userId, session.user.id))
     .orderBy(quotes.createdAt);
+
+  return results.map(item => ({ ...item, text: decrypt(item.text) }));
 }
 
 export async function addQuote(formData: FormData) {
@@ -199,13 +220,13 @@ export async function addQuote(formData: FormData) {
 
   try {
     const [newQuote] = await db.insert(quotes).values({
-      text,
+      text: encrypt(text),
       createdAt: new Date(),
       userId: session.user.id,
     }).returning();
 
     revalidatePath("/");
-    return { data: newQuote };
+    return { data: { ...newQuote, text: decrypt(newQuote.text) } };
   } catch {
     return { error: "Failed to add quote" };
   }

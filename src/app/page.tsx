@@ -80,12 +80,12 @@ export default async function Home() {
   const minutes = totalMinutes % 60;
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-background to-muted sm:p-6 p-2 flex flex-col gap-4">
-      <div className="w-full h-full space-y-6">
+    <main className="min-h-screen bg-linear-to-br from-background to-muted sm:p-4 p-2 flex flex-col gap-4">
+      <div className="w-full h-full space-y-4">
         {/* Global Header with Mode Toggle */}
 
         <Tabs defaultValue="today" className="w-full h-full flex flex-col">
-          <div className="flex flex-row gap-2 items-center justify-between mb-6 shrink-0 px-2">
+          <div className="flex flex-row gap-2 items-center justify-between mb-4 shrink-0 px-2">
             <CurrentDate />
             <TabsList>
               <TabsTrigger value="today">Today</TabsTrigger>
@@ -104,10 +104,10 @@ export default async function Home() {
 
           <TabsContent
             value="today"
-            className="space-y-6 flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="space-y-4 flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500"
           >
             {/* Top Bar: Stats & Clock */}
-            <div className="grid grid-cols-12 gap-6 shrink-0">
+            <div className="grid grid-cols-12 gap-4 shrink-0">
               <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
                 <Card className="bg-background/50 backdrop-blur-sm">
                   <CardContent className="pt-6">
@@ -153,14 +153,14 @@ export default async function Home() {
             </div>
 
             {/* Main Content Area */}
-            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
+            <div className="grid grid-cols-12 gap-4 flex-1 min-h-0">
               {/* Left Sidebar: Sticky Notes (4 cols) */}
-              <div className="col-span-12 lg:col-span-4 h-full min-h-[300px]">
+              <div className="col-span-12 lg:col-span-4 h-full min-h-[300px] order-2 lg:order-1">
                 <StickyNotes />
               </div>
 
               {/* Main Dashboard (8 cols) */}
-              <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+              <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 order-1 lg:order-2">
                 <div className="flex-1 min-h-[500px]">
                   <Dashboard todos={dailyTodos} />
                 </div>
