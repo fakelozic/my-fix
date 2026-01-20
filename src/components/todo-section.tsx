@@ -18,13 +18,18 @@ interface TodoSectionProps {
 
 type OptimisticTodo = Todo & { pending?: boolean };
 
+type OptimisticAction = 
+  | { type: "add"; payload: Partial<Todo> }
+  | { type: "toggle"; payload: { id: number; completed: boolean } }
+  | { type: "delete"; payload: { id: number } };
+
 export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
 
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
-    todos,
-    (state: OptimisticTodo[], action: { type: string; payload: any }) => {
+    todos as OptimisticTodo[],
+    (state: OptimisticTodo[], action: OptimisticAction) => {
       switch (action.type) {
         case "add":
           return [
@@ -35,7 +40,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
               pending: true,
               completed: false,
               createdAt: new Date(),
-            },
+            } as OptimisticTodo,
           ];
         case "toggle":
           return state.map((t) =>
@@ -147,7 +152,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                   key={todo.id}
                   className={cn(
                     "group flex items-center justify-between p-2 rounded-md border bg-card transition-all duration-300",
-                    (todo.completed || (todo as any).pending) && "opacity-60 bg-muted/50",
+                    (todo.completed || todo.pending) && "opacity-60 bg-muted/50",
                     isActive && "ring-2 ring-primary border-primary shadow-md scale-[1.02] z-10",
                     isDimmed && "opacity-40 blur-[1px] grayscale"
                   )}

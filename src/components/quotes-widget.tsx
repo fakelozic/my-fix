@@ -9,6 +9,10 @@ import { getDailyQuotes, getQuotes, addQuote, deleteQuote } from "@/app/actions"
 import { Quote } from "@/db/schema";
 import { toast } from "sonner";
 
+type OptimisticAction = 
+  | { type: "add"; payload: Partial<Quote> }
+  | { type: "delete"; payload: { id: number } };
+
 export function QuotesWidget() {
   const [displayQuotes, setDisplayQuotes] = useState<Quote[]>([]);
   const [allQuotes, setAllQuotes] = useState<Quote[]>([]);
@@ -20,7 +24,7 @@ export function QuotesWidget() {
 
   const [optimisticAllQuotes, addOptimisticQuote] = useOptimistic(
     allQuotes,
-    (state: Quote[], action: { type: string; payload: any }) => {
+    (state: Quote[], action: OptimisticAction) => {
       switch (action.type) {
         case "add":
           return [
@@ -29,7 +33,7 @@ export function QuotesWidget() {
               ...action.payload,
               id: Math.random(),
               createdAt: new Date(),
-            },
+            } as Quote,
           ];
         case "delete":
           return state.filter((q) => q.id !== action.payload.id);

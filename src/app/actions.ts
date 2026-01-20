@@ -40,7 +40,7 @@ export async function addTodo(formData: FormData) {
 
     revalidatePath("/");
     return { data: newTodo };
-  } catch (e) {
+  } catch {
     return { error: "Failed to add task" };
   }
 }
@@ -60,7 +60,7 @@ export async function toggleTodo(id: number, completed: boolean) {
       .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)));
     revalidatePath("/");
     return { success: true };
-  } catch (e) {
+  } catch {
     return { error: "Failed to update task" };
   }
 }
@@ -81,7 +81,7 @@ export async function updateTodoStatus(id: number, status: string) {
       .where(and(eq(todos.id, id), eq(todos.userId, session.user.id)));
     revalidatePath("/");
     return { success: true };
-  } catch (e) {
+  } catch {
     return { error: "Failed to update status" };
   }
 }
@@ -94,7 +94,7 @@ export async function deleteTodo(id: number) {
     await db.delete(todos).where(and(eq(todos.id, id), eq(todos.userId, session.user.id)));
     revalidatePath("/");
     return { success: true };
-  } catch (e) {
+  } catch {
     return { error: "Failed to delete task" };
   }
 }
@@ -141,7 +141,7 @@ export async function addQuote(formData: FormData) {
 
     revalidatePath("/");
     return { data: newQuote };
-  } catch (e) {
+  } catch {
     return { error: "Failed to add quote" };
   }
 }
@@ -154,7 +154,7 @@ export async function deleteQuote(id: number) {
     await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.userId, session.user.id)));
     revalidatePath("/");
     return { success: true };
-  } catch (e) {
+  } catch {
     return { error: "Failed to delete quote" };
   }
 }

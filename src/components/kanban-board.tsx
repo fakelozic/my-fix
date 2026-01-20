@@ -26,13 +26,18 @@ const COLUMNS = [
   { id: "done", label: "Done", icon: CheckCircle2, color: "text-green-500" },
 ];
 
+type OptimisticAction = 
+  | { type: "add"; payload: Partial<Todo> }
+  | { type: "move"; payload: { id: number; status: string } }
+  | { type: "delete"; payload: { id: number } };
+
 export function KanbanBoard({ todos }: KanbanBoardProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
 
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
     todos,
-    (state: Todo[], action: { type: string; payload: any }) => {
+    (state: Todo[], action: OptimisticAction) => {
       switch (action.type) {
         case "add":
           return [
@@ -43,7 +48,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
               status: "todo",
               completed: false,
               createdAt: new Date(),
-            },
+            } as Todo,
           ];
         case "move":
           return state.map((t) =>

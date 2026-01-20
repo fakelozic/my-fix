@@ -31,16 +31,6 @@ export async function decrypt(input: string): Promise<SessionPayload> {
   return payload as SessionPayload;
 }
 
-export async function login(formData: FormData) {
-  // Verify credentials...
-  // Create session
-  const user = { username: formData.get("username") }; // Simplified
-  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = await encrypt({ user, expires });
-
-  (await cookies()).set("session", session, { expires, httpOnly: true });
-}
-
 export async function logout() {
   (await cookies()).set("session", "", { expires: new Date(0) });
 }
