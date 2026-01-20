@@ -139,8 +139,8 @@ export const PomodoroTimer = forwardRef<PomodoroTimerRef>((props, ref) => {
 
   if (!isSessionActive) {
     return (
-      <Card className="w-full h-full min-h-[400px] flex flex-col justify-center p-8 gap-6 bg-background/50 backdrop-blur-sm border-2">
-        <div className="flex flex-col gap-4 flex-1 justify-center">
+      <Card className="w-full h-full min-h-[400px] flex flex-col justify-center p-4 gap-y-10 bg-background/50 backdrop-blur-sm border-2">
+        <div className="flex flex-col gap-4 flex-1 justify-around">
             <Button 
                 variant="outline"
                 className="h-32 text-3xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"

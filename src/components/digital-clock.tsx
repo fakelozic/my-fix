@@ -56,7 +56,7 @@ export function CurrentDate() {
   if (!date) return <div className="h-6 w-32 bg-muted/20 animate-pulse rounded" />;
 
   return (
-    <div className="text-lg font-medium text-muted-foreground uppercase tracking-widest">
+    <div className="flex justify-start sm:text-lg font-medium text-muted-foreground uppercase tracking-widest">
       {date}
     </div>
   );
