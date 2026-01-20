@@ -161,7 +161,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                                             <Button 
                                                 variant="ghost" 
                                                 size="icon-sm" 
-                                                className="h-6 w-6 shrink-0 text-muted-foreground"
+                                                className="h-6 w-6 shrink-0 text-muted-foreground relative before:absolute before:-inset-3 before:content-['']"
                                                 onMouseEnter={() => setOpenMenuId(todo.id)}
                                             >
                                                 <MoreHorizontal className="w-4 h-4" />
