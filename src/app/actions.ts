@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { todos, quotes } from "@/db/schema";
+import { todos, quotes, kanbanTasks } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
@@ -15,6 +15,17 @@ export async function getTodos() {
     .from(todos)
     .where(eq(todos.userId, session.user.id))
     .orderBy(todos.createdAt);
+}
+
+export async function getKanbanTasks() {
+  const session = await getSession();
+  if (!session?.user?.id) return [];
+
+  return await db
+    .select()
+    .from(kanbanTasks)
+    .where(eq(kanbanTasks.userId, session.user.id))
+    .orderBy(kanbanTasks.createdAt);
 }
 
 export async function addTodo(formData: FormData) {
@@ -42,6 +53,29 @@ export async function addTodo(formData: FormData) {
     return { data: newTodo };
   } catch {
     return { error: "Failed to add task" };
+  }
+}
+
+export async function addKanbanTask(formData: FormData) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const text = formData.get("text") as string;
+  
+  if (!text || text.trim().length === 0) return { error: "Text is required" };
+
+  try {
+    const [newTask] = await db.insert(kanbanTasks).values({
+      text,
+      status: "todo",
+      createdAt: new Date(),
+      userId: session.user.id,
+    }).returning();
+
+    revalidatePath("/");
+    return { data: newTask };
+  } catch {
+    return { error: "Failed to add kanban task" };
   }
 }
 
@@ -86,6 +120,24 @@ export async function updateTodoStatus(id: number, status: string) {
   }
 }
 
+export async function updateKanbanTaskStatus(id: number, status: string) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await db
+      .update(kanbanTasks)
+      .set({ 
+        status, 
+      })
+      .where(and(eq(kanbanTasks.id, id), eq(kanbanTasks.userId, session.user.id)));
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return { error: "Failed to update status" };
+  }
+}
+
 export async function deleteTodo(id: number) {
   const session = await getSession();
   if (!session?.user?.id) return { error: "Unauthorized" };
@@ -96,6 +148,19 @@ export async function deleteTodo(id: number) {
     return { success: true };
   } catch {
     return { error: "Failed to delete task" };
+  }
+}
+
+export async function deleteKanbanTask(id: number) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await db.delete(kanbanTasks).where(and(eq(kanbanTasks.id, id), eq(kanbanTasks.userId, session.user.id)));
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return { error: "Failed to delete kanban task" };
   }
 }
 

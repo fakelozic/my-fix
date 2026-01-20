@@ -26,6 +26,14 @@ export const todos = pgTable("todos", {
   userId: integer("user_id").references(() => users.id), // Nullable for now
 });
 
+export const kanbanTasks = pgTable("kanban_tasks", {
+  id: serial("id").primaryKey(),
+  text: text("text").notNull(),
+  status: text("status").notNull().default("todo"), // 'todo', 'in-progress', 'done'
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  userId: integer("user_id").references(() => users.id),
+});
+
 export const quotes = pgTable("quotes", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
@@ -38,6 +46,9 @@ export type NewUser = typeof users.$inferInsert;
 
 export type Todo = typeof todos.$inferSelect;
 export type NewTodo = typeof todos.$inferInsert;
+
+export type KanbanTask = typeof kanbanTasks.$inferSelect;
+export type NewKanbanTask = typeof kanbanTasks.$inferInsert;
 
 export type Quote = typeof quotes.$inferSelect;
 export type NewQuote = typeof quotes.$inferInsert;

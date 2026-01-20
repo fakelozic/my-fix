@@ -1,5 +1,5 @@
 import { Todo } from "@/db/schema";
-import { getTodos } from "@/app/actions";
+import { getTodos, getKanbanTasks } from "@/app/actions";
 import { logoutAction } from "@/app/auth-actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
@@ -60,8 +60,8 @@ function calculateStreak(todos: Todo[]) {
 
 export default async function Home() {
   const todos = await getTodos();
+  const kanbanTasks = await getKanbanTasks();
   const dailyTodos = todos.filter((t) => t.type === "daily");
-  const kanbanTodos = todos.filter((t) => t.type === "kanban");
 
   const streak = calculateStreak(dailyTodos);
 
@@ -181,7 +181,7 @@ export default async function Home() {
           </TabsContent>
 
           <TabsContent value="kanban" className="space-y-8 h-full">
-            <KanbanBoard todos={kanbanTodos} />
+            <KanbanBoard tasks={kanbanTasks} />
           </TabsContent>
         </Tabs>
       </div>

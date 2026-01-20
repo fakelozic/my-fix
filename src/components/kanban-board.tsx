@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useOptimistic, useTransition, useState } from "react";
-import { Todo } from "@/db/schema";
-import { updateTodoStatus, addTodo, deleteTodo } from "@/app/actions";
+import { KanbanTask } from "@/db/schema";
+import { updateKanbanTaskStatus, addKanbanTask, deleteKanbanTask } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,11 @@ import {
 import { toast } from "sonner";
 
 interface KanbanBoardProps {
-  todos: Todo[];
+  tasks: KanbanTask[];
 }
 
 type OptimisticAction = 
-  | { type: "add"; payload: Partial<Todo> }
+  | { type: "add"; payload: Partial<KanbanTask> }
   | { type: "move"; payload: { id: number; status: string } }
   | { type: "delete"; payload: { id: number } };
 
@@ -31,14 +31,14 @@ const COLUMNS = [
   { id: "done", label: "Done", icon: CheckCircle2, color: "text-green-500" },
 ];
 
-export function KanbanBoard({ todos }: KanbanBoardProps) {
+export function KanbanBoard({ tasks }: KanbanBoardProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
-  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
-    todos,
-    (state: Todo[], action: OptimisticAction) => {
+  const [optimisticTasks, addOptimisticTask] = useOptimistic(
+    tasks,
+    (state: KanbanTask[], action: OptimisticAction) => {
       switch (action.type) {
         case "add":
           return [
@@ -47,13 +47,12 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
               ...action.payload,
               id: Math.random(),
               status: "todo",
-              completed: false,
               createdAt: new Date(),
-            } as Todo,
+            } as KanbanTask,
           ];
         case "move":
           return state.map((t) =>
-            t.id === action.payload.id ? { ...t, status: action.payload.status, completed: action.payload.status === "done" } : t
+            t.id === action.payload.id ? { ...t, status: action.payload.status } : t
           );
         case "delete":
           return state.filter((t) => t.id !== action.payload.id);
@@ -63,25 +62,19 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
     }
   );
 
-  const getColumnTodos = (status: string) => {
-    if (status === "todo") {
-        return optimisticTodos.filter(t => t.status === "todo" || (!t.status && !t.completed));
-    }
-    if (status === "done") {
-        return optimisticTodos.filter(t => t.status === "done" || (!t.status && t.completed));
-    }
-    return optimisticTodos.filter(t => t.status === status);
+  const getColumnTasks = (status: string) => {
+    return optimisticTasks.filter(t => t.status === status);
   };
 
-  const handleAddTodo = async (formData: FormData) => {
+  const handleAddTask = async (formData: FormData) => {
     const text = formData.get("text") as string;
     if (!text?.trim()) return;
 
     formRef.current?.reset();
     
     startTransition(async () => {
-        addOptimisticTodo({ type: "add", payload: { text, type: "kanban" } });
-        const result = await addTodo(formData);
+        addOptimisticTask({ type: "add", payload: { text } });
+        const result = await addKanbanTask(formData);
         if (result?.error) {
             toast.error(result.error);
         }
@@ -90,18 +83,18 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
 
   const moveTask = async (id: number, nextStatus: string) => {
     startTransition(async () => {
-        addOptimisticTodo({ type: "move", payload: { id, status: nextStatus } });
-        const result = await updateTodoStatus(id, nextStatus);
+        addOptimisticTask({ type: "move", payload: { id, status: nextStatus } });
+        const result = await updateKanbanTaskStatus(id, nextStatus);
         if (result?.error) {
             toast.error(result.error);
         }
     });
   };
 
-  const handleDeleteTodo = async (id: number) => {
+  const handleDeleteTask = async (id: number) => {
     startTransition(async () => {
-        addOptimisticTodo({ type: "delete", payload: { id } });
-        const result = await deleteTodo(id);
+        addOptimisticTask({ type: "delete", payload: { id } });
+        const result = await deleteKanbanTask(id);
         if (result?.error) {
             toast.error(result.error);
         }
@@ -113,12 +106,11 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
       <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Project Board</h2>
           <form
-            action={handleAddTodo}
+            action={handleAddTask}
             ref={formRef}
             className="flex gap-2 w-full max-w-sm"
           >
             <Input name="text" placeholder="Add a project task..." className="bg-background" autoComplete="off" />
-            <input type="hidden" name="type" value="kanban" />
             <Button type="submit" disabled={isPending}>
                 <Plus className="w-4 h-4 mr-2" /> Add
             </Button>
@@ -127,7 +119,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-h-[500px]">
         {COLUMNS.map((col) => {
-          const colTodos = getColumnTodos(col.id);
+          const colTasks = getColumnTasks(col.id);
           const Icon = col.icon;
           
           return (
@@ -137,24 +129,24 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                    <Icon className={cn("w-5 h-5", col.color)} />
                    {col.label}
                    <span className="ml-2 text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                     {colTodos.length}
+                     {colTasks.length}
                    </span>
                 </div>
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-3">
-                 {colTodos.length === 0 ? (
+                 {colTasks.length === 0 ? (
                     <div className="h-20 flex items-center justify-center text-sm text-muted-foreground border-2 border-dashed rounded-lg opacity-50">
                         Empty
                     </div>
                  ) : (
-                    colTodos.map(todo => (
-                        <Card key={todo.id} className="bg-background shadow-sm hover:shadow-md transition-all duration-200">
+                    colTasks.map(task => (
+                        <Card key={task.id} className="bg-background shadow-sm hover:shadow-md transition-all duration-200">
                             <CardContent className="p-3 flex flex-col gap-2">
                                 <div className="flex justify-between items-start gap-2">
-                                    <p className="text-base font-medium leading-relaxed break-words">{todo.text}</p>
+                                    <p className="text-base font-medium leading-relaxed break-words">{task.text}</p>
                                     <DropdownMenu 
-                                        open={openMenuId === todo.id} 
+                                        open={openMenuId === task.id} 
                                         onOpenChange={(open) => !open && setOpenMenuId(null)}
                                     >
                                         <DropdownMenuTrigger asChild>
@@ -162,7 +154,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                                                 variant="ghost" 
                                                 size="icon-sm" 
                                                 className="h-6 w-6 shrink-0 text-muted-foreground relative before:absolute before:-inset-3 before:content-['']"
-                                                onMouseEnter={() => setOpenMenuId(todo.id)}
+                                                onMouseEnter={() => setOpenMenuId(task.id)}
                                             >
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </Button>
@@ -174,14 +166,14 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                                             {COLUMNS.filter(c => c.id !== col.id).map(targetCol => (
                                                 <DropdownMenuItem 
                                                     key={targetCol.id}
-                                                    onClick={() => moveTask(todo.id, targetCol.id)}
+                                                    onClick={() => moveTask(task.id, targetCol.id)}
                                                 >
                                                     Move to {targetCol.label}
                                                 </DropdownMenuItem>
                                             ))}
                                             <DropdownMenuItem 
                                                 className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                                                onClick={() => handleDeleteTodo(todo.id)}
+                                                onClick={() => handleDeleteTask(task.id)}
                                             >
                                                 <Trash2 className="w-4 h-4 mr-2" />
                                                 Delete
