@@ -1,10 +1,17 @@
-import { pgTable, text, integer, boolean, timestamp, serial } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  integer,
+  boolean,
+  timestamp,
+  serial,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export const todos = pgTable("todos", {
@@ -14,15 +21,15 @@ export const todos = pgTable("todos", {
   status: text("status").notNull().default("todo"), // 'todo', 'in-progress', 'done'
   type: text("type").notNull().default("daily"), // 'daily', 'kanban'
   completed: boolean("completed").notNull().default(false),
-  completedAt: timestamp("completed_at"),
-  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   userId: integer("user_id").references(() => users.id), // Nullable for now
 });
 
 export const quotes = pgTable("quotes", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   userId: integer("user_id").references(() => users.id), // Nullable for now
 });
 
