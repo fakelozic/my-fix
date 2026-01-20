@@ -41,6 +41,21 @@ export const quotes = pgTable("quotes", {
   userId: integer("user_id").references(() => users.id), // Nullable for now
 });
 
+export const habitLogs = pgTable("habit_logs", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(), // YYYY-MM-DD
+  habits: text("habits").notNull(), // JSON string: { "habit_id": "value", ... } - Encrypted
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  userId: integer("user_id").references(() => users.id),
+});
+
+export const habits = pgTable("habits", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  userId: integer("user_id").references(() => users.id),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -52,3 +67,9 @@ export type NewKanbanTask = typeof kanbanTasks.$inferInsert;
 
 export type Quote = typeof quotes.$inferSelect;
 export type NewQuote = typeof quotes.$inferInsert;
+
+export type HabitLog = typeof habitLogs.$inferSelect;
+export type NewHabitLog = typeof habitLogs.$inferInsert;
+
+export type Habit = typeof habits.$inferSelect;
+export type NewHabit = typeof habits.$inferInsert;

@@ -59,21 +59,21 @@ export function StickyNotes() {
 
   return (
     <Card className="h-full bg-background/50 backdrop-blur-sm border-none shadow-none flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between pb-4 px-4 pt-4">
+      <CardHeader className="flex flex-row items-center justify-between pb-4 px-4 pt-4 shrink-0">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <StickyNote className="w-5 h-5 text-primary" />
-          Sticky Notes
+          Notes
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={addNote} className="gap-1 h-8 px-4">
-          <Plus className="w-3 h-3" /> New Note
+        <Button size="sm" variant="outline" onClick={addNote} className="gap-1 h-8 px-3">
+          <Plus className="w-4 h-4" /> New
         </Button>
       </CardHeader>
-      <CardContent className="p-4 flex-1 overflow-y-auto pt-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 pt-2">
+      <CardContent className="p-4 flex-1 overflow-y-auto pt-0">
+        <div className="grid grid-cols-1 gap-4 pb-4 px-1 pt-1">
           {notes.map((note) => (
             <div 
               key={note.id} 
-              className={`relative p-4 rounded-lg border shadow-sm min-h-[160px] flex flex-col group transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:z-10 ${note.color}`}
+              className={`relative p-4 rounded-lg border shadow-sm min-h-[140px] flex flex-col group transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:z-10 ${note.color}`}
             >
               <Button
                 variant="ghost"

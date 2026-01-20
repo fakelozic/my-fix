@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { todos, quotes, kanbanTasks } from "@/db/schema";
-import { eq, sql, and } from "drizzle-orm";
+import { todos, quotes, kanbanTasks, habitLogs, habits } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
@@ -242,5 +242,105 @@ export async function deleteQuote(id: number) {
     return { success: true };
   } catch {
     return { error: "Failed to delete quote" };
+  }
+}
+
+// Habit Actions
+
+export async function getHabits() {
+  const session = await getSession();
+  if (!session?.user?.id) return [];
+
+  const results = await db
+    .select()
+    .from(habits)
+    .where(eq(habits.userId, session.user.id))
+    .orderBy(habits.createdAt);
+  
+  return results.map(h => ({ ...h, name: decrypt(h.name) }));
+}
+
+export async function addHabit(formData: FormData) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const name = formData.get("name") as string;
+  if (!name || name.trim().length === 0) return { error: "Name is required" };
+
+  try {
+    const [newHabit] = await db.insert(habits).values({
+      name: encrypt(name),
+      userId: session.user.id,
+      createdAt: new Date(),
+    }).returning();
+
+    revalidatePath("/");
+    return { data: { ...newHabit, name: decrypt(newHabit.name) } };
+  } catch {
+    return { error: "Failed to add habit" };
+  }
+}
+
+export async function deleteHabit(id: number) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await db.delete(habits).where(and(eq(habits.id, id), eq(habits.userId, session.user.id)));
+    revalidatePath("/");
+    return { success: true };
+  } catch {
+    return { error: "Failed to delete habit" };
+  }
+}
+
+export async function getHabitLogs() {
+  const session = await getSession();
+  if (!session?.user?.id) return [];
+
+  const results = await db
+    .select()
+    .from(habitLogs)
+    .where(eq(habitLogs.userId, session.user.id))
+    .orderBy(desc(habitLogs.date));
+
+  return results.map(item => ({
+    ...item,
+    habits: JSON.parse(decrypt(item.habits))
+  }));
+}
+
+export async function saveHabitLog(date: string, habits: Record<string, string>) {
+  const session = await getSession();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    const encryptedHabits = encrypt(JSON.stringify(habits));
+
+    // Check if exists
+    const existing = await db
+      .select()
+      .from(habitLogs)
+      .where(and(eq(habitLogs.userId, session.user.id), eq(habitLogs.date, date)))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(habitLogs)
+        .set({ habits: encryptedHabits })
+        .where(eq(habitLogs.id, existing[0].id));
+    } else {
+      await db.insert(habitLogs).values({
+        date,
+        habits: encryptedHabits,
+        userId: session.user.id,
+      });
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { error: "Failed to save habit log" };
   }
 }

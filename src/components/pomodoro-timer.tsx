@@ -139,42 +139,41 @@ export const PomodoroTimer = forwardRef<PomodoroTimerRef>((props, ref) => {
 
   if (!isSessionActive) {
     return (
-      <Card className="w-full h-full min-h-[400px] flex flex-col justify-center p-4 gap-y-10 bg-background/50 backdrop-blur-sm border-2">
-        <div className="flex flex-col gap-4 flex-1 justify-around">
+      <Card className="w-full h-full min-h-[300px] flex flex-col justify-center p-4 gap-y-4 bg-background/50 backdrop-blur-sm border-2">
+        <div className="flex flex-col gap-3 flex-1 justify-center">
             <Button 
                 variant="outline"
-                className="h-32 text-3xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                className="h-24 text-2xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                 onClick={() => startSession("focus30")}
             >
                 <div className="flex items-center gap-3">
-                    <Brain className="w-8 h-8 text-red-500 group-hover:scale-110 transition-transform" />
+                    <Brain className="w-6 h-6 text-red-500 group-hover:scale-110 transition-transform" />
                     30m Focus
                 </div>
-                <span className="text-sm font-normal text-muted-foreground">Quick session for momentum</span>
+                <span className="text-xs font-normal text-muted-foreground">Quick session for momentum</span>
             </Button>
             
             <Button 
                 variant="outline"
-                className="h-32 text-3xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                className="h-24 text-2xl font-bold flex flex-col gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                 onClick={() => startSession("focus60")}
             >
                 <div className="flex items-center gap-3">
-                    <Brain className="w-8 h-8 text-indigo-500 group-hover:scale-110 transition-transform" />
+                    <Brain className="w-6 h-6 text-indigo-500 group-hover:scale-110 transition-transform" />
                     60m Focus
                 </div>
-                 <span className="text-sm font-normal text-muted-foreground">Deep work block</span>
+                 <span className="text-xs font-normal text-muted-foreground">Deep work block</span>
             </Button>
 
             <Button 
                 variant="outline"
-                className="h-24 text-2xl font-bold flex flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                className="h-16 text-lg font-bold flex flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all group"
                 onClick={() => startSession("shortBreak")}
             >
                 <div className="flex items-center gap-2">
-                    <Coffee className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />
+                    <Coffee className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
                     Short Break
                 </div>
-                 <span className="text-xs font-normal text-muted-foreground">5m rest interval</span>
             </Button>
         </div>
       </Card>
@@ -183,16 +182,16 @@ export const PomodoroTimer = forwardRef<PomodoroTimerRef>((props, ref) => {
 
   return (
     <>
-      <Card className="relative w-full h-full min-h-[400px] flex flex-col mx-auto overflow-hidden bg-background/50 backdrop-blur-sm border-2 z-0">
+      <Card className="relative w-full h-full min-h-[300px] flex flex-col mx-auto overflow-hidden bg-background/50 backdrop-blur-sm border-2 z-0">
         {/* Subtle Background Shade */}
         <div 
           className={cn("absolute bottom-0 left-0 right-0 z-0 transition-all duration-1000 ease-linear", MODES[mode].bgColor)}
           style={{ height: `${percentageCompleted}%` }}
         />
 
-        <div className="relative z-10 flex-1 flex flex-col">
+        <div className="relative z-10 flex-1 flex flex-col p-4">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
               {(() => {
                 const Icon = MODES[mode].icon;
                 return <Icon className={cn("w-5 h-5", MODES[mode].color)} />;
@@ -208,26 +207,26 @@ export const PomodoroTimer = forwardRef<PomodoroTimerRef>((props, ref) => {
                 <RotateCcw className="w-4 h-4" />
             </Button>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col items-center justify-center gap-8 py-8">
-            <div className="text-9xl font-mono tracking-tighter tabular-nums font-bold text-foreground">
+          <CardContent className="flex-1 flex flex-col items-center justify-center gap-6 py-4">
+            <div className="text-7xl font-mono tracking-tighter tabular-nums font-bold text-foreground">
               {formatTime(timeLeft)}
             </div>
             
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <Button 
                 size="lg" 
-                className={cn("w-40 h-16 text-xl rounded-full shadow-lg transition-transform active:scale-95",
+                className={cn("w-36 h-12 text-lg rounded-full shadow-lg transition-transform active:scale-95",
                   isRunning ? "bg-amber-500 hover:bg-amber-600" : "bg-primary hover:bg-primary/90"
                 )}
                 onClick={toggleTimer}
               >
                 {isRunning ? (
                   <>
-                    <Pause className="mr-2 h-6 w-6" /> Pause
+                    <Pause className="mr-2 h-5 w-5" /> Pause
                   </>
                 ) : (
                   <>
-                    <Play className="mr-2 h-6 w-6" /> Resume
+                    <Play className="mr-2 h-5 w-5" /> Resume
                   </>
                 )}
               </Button>

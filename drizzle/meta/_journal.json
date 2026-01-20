@@ -15,6 +15,20 @@
       "when": 1768889241914,
       "tag": "0001_flawless_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1768901058461,
+      "tag": "0002_zippy_havok",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1768901460069,
+      "tag": "0003_flowery_bloodscream",
+      "breakpoints": true
     }
   ]
 }

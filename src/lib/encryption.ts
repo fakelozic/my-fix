@@ -37,8 +37,7 @@ export function decrypt(text: string): string {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     
     return decrypted.toString();
-  } catch (error) {
-    // If decryption fails, return original text (backward compatibility)
-    return text;
+  } catch {
+    return text; // Return plain text if decryption fails (for legacy data)
   }
 }

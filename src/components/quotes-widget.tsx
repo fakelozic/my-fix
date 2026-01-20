@@ -122,40 +122,40 @@ export function QuotesWidget() {
   };
 
   return (
-    <Card className="bg-background/50 backdrop-blur-sm h-full flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+    <Card className="bg-background/50 backdrop-blur-sm flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 pt-4 shrink-0">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <QuoteIcon className="w-5 h-5 text-primary" />
-          Daily Inspiration
+          Inspiration
         </CardTitle>
         <div className="flex gap-1">
             <Button 
                 variant="ghost" 
-                size="sm" 
+                size="icon" 
                 onClick={() => { setIsManaging(!isManaging); setIsAdding(false); }}
-                className="gap-1"
+                className="h-8 w-8"
                 title="Manage List"
             >
                 <List className="w-4 h-4" />
             </Button>
             <Button 
                 variant="ghost" 
-                size="sm" 
+                size="icon" 
                 onClick={() => { setIsAdding(!isAdding); setIsManaging(false); }}
-                className="gap-1"
+                className="h-8 w-8"
                 title="Add Quote"
             >
                 <Plus className="w-4 h-4" />
             </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4 justify-center">
+      <CardContent className="p-4 pt-0 flex flex-col gap-3">
         {isAdding && (
-            <div className="flex gap-2 animate-in slide-in-from-top-2 mb-2">
+            <div className="flex gap-2 animate-in slide-in-from-top-2">
                 <Input 
                     value={newQuote}
                     onChange={(e) => setNewQuote(e.target.value)}
-                    placeholder="Enter your quote..."
+                    placeholder="New quote..."
                     className="flex-1"
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && handleAddQuote()}
@@ -168,9 +168,9 @@ export function QuotesWidget() {
         )}
 
         {isManaging ? (
-            <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-2 max-h-[150px] overflow-y-auto pr-2">
                 {optimisticAllQuotes.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-4">No quotes saved.</p>
+                    <p className="text-center text-sm text-muted-foreground py-4">No quotes.</p>
                 ) : (
                     optimisticAllQuotes.map((q) => (
                         <div key={q.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50 border text-sm group">
@@ -191,15 +191,14 @@ export function QuotesWidget() {
         ) : (
             displayQuotes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-4 text-muted-foreground opacity-50">
-                    <p className="text-2xl font-serif">...</p>
-                    <p className="text-xs">{loading ? "Loading..." : "Add a quote for inspiration"}</p>
+                    <p className="text-sm">{loading ? "..." : "No quotes"}</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-3">
                     {displayQuotes.map((q) => (
-                        <div key={q.id} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-border/50 italic text-muted-foreground relative">
-                            <span className="text-3xl text-primary/20 absolute -top-2 -left-2">“</span>
-                            <p className="z-10 relative">{q.text}</p>
+                        <div key={q.id} className="p-3 rounded-lg bg-muted/30 border border-border/50 italic text-muted-foreground relative">
+                            <span className="text-2xl text-primary/20 absolute -top-1 -left-1">“</span>
+                            <p className="z-10 relative text-sm leading-relaxed">{q.text}</p>
                         </div>
                     ))}
                 </div>

@@ -1,12 +1,14 @@
 import { Todo } from "@/db/schema";
-import { getTodos, getKanbanTasks } from "@/app/actions";
+import { getTodos, getKanbanTasks, getHabitLogs, getHabits } from "@/app/actions";
 import { logoutAction } from "@/app/auth-actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
 import { HistoryTable } from "@/components/history-table";
+import { HabitHistory } from "@/components/habit-history";
+import { HabitWeekTable } from "@/components/habit-week-table";
+import { DailyHabitChecklist } from "@/components/daily-habit-checklist";
 import { StickyNotes } from "@/components/sticky-notes";
-import { QuotesWidget } from "@/components/quotes-widget";
 import { KanbanBoard } from "@/components/kanban-board";
 import { ModeToggle } from "@/components/mode-toggle";
 import { DigitalClock, CurrentDate } from "@/components/digital-clock";
@@ -18,12 +20,11 @@ import { Flame, LogOut } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 function calculateStreak(todos: Todo[]) {
-  // ... existing logic ...
   const completedDates = todos
     .filter((t) => t.completed && t.completedAt)
     .map((t) => new Date(t.completedAt!).toDateString())
-    .filter((value, index, self) => self.indexOf(value) === index) // Unique dates
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()); // Descending
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
   if (completedDates.length === 0) return 0;
 
@@ -62,11 +63,21 @@ function calculateStreak(todos: Todo[]) {
 export default async function Home() {
   const todos = await getTodos();
   const kanbanTasks = await getKanbanTasks();
+  const habitLogs = await getHabitLogs();
+  const habits = await getHabits();
   const dailyTodos = todos.filter((t) => t.type === "daily");
 
   const streak = calculateStreak(dailyTodos);
 
   const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+
+  const todayLogEntry = habitLogs.find(l => l.date === todayStr);
+  const todayHabitValues = todayLogEntry ? todayLogEntry.habits : {};
+
   today.setHours(0, 0, 0, 0);
 
   const completedToday = dailyTodos.filter(
@@ -81,110 +92,133 @@ export default async function Home() {
   const minutes = totalMinutes % 60;
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-background to-muted sm:p-4 p-2 flex flex-col gap-4">
-      <div className="w-full h-full space-y-4">
-        {/* Global Header with Mode Toggle */}
+    <main className="min-h-screen w-full lg:h-screen lg:overflow-hidden bg-background text-foreground flex flex-col p-4 overflow-y-auto">
+      <Tabs defaultValue="today" className="flex-1 flex flex-col gap-4 lg:overflow-hidden">
+        {/* Header Section */}
+        <div className="shrink-0 flex flex-row items-center justify-between">
+          <CurrentDate />
+          <TabsList>
+            <TabsTrigger value="today">Today</TabsTrigger>
+            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <form action={logoutAction}>
+              <Button variant="ghost" size="icon" title="Logout">
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </form>
+          </div>
+        </div>
 
-        <Tabs defaultValue="today" className="w-full h-full flex flex-col">
-          <div className="flex flex-row gap-2 items-center justify-between mb-4 shrink-0 px-2">
-            <CurrentDate />
-            <TabsList>
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="kanban">Kanban</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
-            <div className="flex items-center gap-2">
-              <ModeToggle />
-              <form action={logoutAction}>
-                <Button variant="ghost" size="icon" title="Logout">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </form>
+        {/* TODAY TAB */}
+        <TabsContent
+          value="today"
+          className="flex-1 flex flex-col gap-4 lg:min-h-0 data-[state=inactive]:hidden"
+        >
+          {/* Top Row: Stats (Compact) + Clock */}
+          <div className="shrink-0 grid grid-cols-1 lg:grid-cols-12 gap-4 h-auto lg:h-[120px]">
+            <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4 h-[100px] lg:h-full">
+              <Card className="bg-background/50 backdrop-blur-sm h-full flex flex-col justify-center">
+                <CardContent className="p-4 flex flex-col gap-1">
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Today&apos;s Focus</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold tracking-tighter">
+                      {hours > 0 ? `${hours}h ` : ""}{minutes}m
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-background/50 backdrop-blur-sm h-full flex flex-col justify-center">
+                <CardContent className="p-4 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-orange-500 mb-1">
+                    <Flame className="w-5 h-5" />
+                    <p className="text-sm font-medium uppercase tracking-wider">Streak</p>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold tracking-tighter text-orange-500">
+                      {streak}
+                    </span>
+                    <span className="text-sm text-muted-foreground uppercase">Days</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="col-span-12 lg:col-span-8 h-[100px] lg:h-full">
+              <div className="h-full flex items-center justify-center bg-background/30 rounded-xl border backdrop-blur-sm px-4">
+                <DigitalClock />
+              </div>
             </div>
           </div>
 
-          <TabsContent
-            value="today"
-            className="space-y-4 flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500"
-          >
-            {/* Top Bar: Stats & Clock */}
-            <div className="grid grid-cols-12 gap-4 shrink-0">
-              <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
-                <Card className="bg-background/50 backdrop-blur-sm">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Today&apos;s Focus
-                      </p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-bold tracking-tighter">
-                          {hours > 0 ? `${hours}h ` : ""}
-                          {minutes}m
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-background/50 backdrop-blur-sm">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-orange-500">
-                        <Flame className="w-5 h-5" />
-                        <p className="text-sm font-medium">Focus Streak</p>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-bold tracking-tighter text-orange-500">
-                          {streak}
-                        </span>
-                        <span className="text-sm text-muted-foreground uppercase">
-                          Days
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="col-span-12 lg:col-span-8">
-                <div className="h-full flex items-center justify-center bg-background/30 rounded-xl border backdrop-blur-sm p-4">
-                  <DigitalClock />
-                </div>
-              </div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="grid grid-cols-12 gap-4 flex-1 min-h-0">
-              {/* Left Sidebar: Sticky Notes (4 cols) */}
-              <div className="col-span-12 lg:col-span-4 h-full min-h-[300px] order-2 lg:order-1">
+          {/* Main Content Grid - REORDERED: Notes | Habits | Dashboard (Pomodoro+Tasks) */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:min-h-0 pb-8 lg:pb-0">
+            {/* 1. Sticky Notes Column (3 cols) */}
+            <div className="lg:col-span-3 min-h-[300px] lg:h-full flex flex-col">
+              <div className="flex-1 overflow-hidden min-h-0">
                 <StickyNotes />
               </div>
+            </div>
 
-              {/* Main Dashboard (8 cols) */}
-              <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 order-1 lg:order-2">
-                <div className="flex-1 min-h-[500px]">
+            {/* 2. Habits Column (3 cols) */}
+            <div className="lg:col-span-3 min-h-[400px] lg:h-full flex flex-col">
+               <div className="flex-1 min-h-0 overflow-hidden">
+                 <DailyHabitChecklist 
+                   habits={habits} 
+                   todayLog={todayHabitValues} 
+                   date={todayStr} 
+                 />
+               </div>
+            </div>
+
+            {/* 3. Dashboard Column (6 cols) */}
+            <div className="lg:col-span-6 min-h-[600px] lg:h-full flex flex-col gap-4">
+               <div className="flex-1 overflow-hidden">
                   <Dashboard todos={dailyTodos} />
-                </div>
-                <div className="shrink-0 h-auto">
-                  <QuotesWidget />
-                </div>
+               </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* HISTORY TAB */}
+        <TabsContent value="history" className="flex-1 flex flex-col min-h-0 lg:overflow-hidden data-[state=inactive]:hidden p-2">
+          <Tabs defaultValue="week" className="w-full h-full flex flex-col">
+            <div className="shrink-0 flex justify-start mb-4">
+              <TabsList>
+                <TabsTrigger value="week">Week View</TabsTrigger>
+                <TabsTrigger value="month">Month View</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="week" className="flex-1 overflow-y-auto min-h-0 space-y-8 data-[state=inactive]:hidden pr-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <HistoryTable todos={dailyTodos} />
+                <HistoryChart todos={dailyTodos} />
               </div>
-            </div>
-          </TabsContent>
+              <div className="grid grid-cols-1 gap-8 pb-4">
+                <HabitWeekTable logs={habitLogs} habits={habits} />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="history" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              <HistoryTable todos={dailyTodos} />
-              <HistoryChart todos={dailyTodos} />
-            </div>
-            <CalendarStats todos={dailyTodos} />
-          </TabsContent>
+            <TabsContent value="month" className="flex-1 overflow-y-auto min-h-0 space-y-8 data-[state=inactive]:hidden pr-2">
+              <CalendarStats todos={dailyTodos} />
+              <div className="grid grid-cols-1 gap-8 pb-4">
+                <HabitHistory logs={habitLogs} habits={habits} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
 
-          <TabsContent value="kanban" className="space-y-8 h-full">
+        {/* KANBAN TAB */}
+        <TabsContent value="kanban" className="flex-1 flex flex-col min-h-0 lg:overflow-hidden data-[state=inactive]:hidden p-1">
+          <div className="flex-1 overflow-y-auto pb-4">
             <KanbanBoard tasks={kanbanTasks} />
-          </TabsContent>
-        </Tabs>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }

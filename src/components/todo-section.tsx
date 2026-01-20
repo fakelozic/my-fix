@@ -93,13 +93,13 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
 
   return (
     <Card className="w-full h-full flex flex-col bg-background/50 backdrop-blur-sm">
-      <CardHeader className="pb-1">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <Check className="w-5 h-5 text-primary" />
           Daily Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden p-4 pt-3">
+      <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden p-4 pt-0">
         
         <form
           action={handleAddTodo}
@@ -137,7 +137,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
           </Button>
         </form>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 min-h-[200px] -mx-2">
+        <div className="flex-1 overflow-y-auto px-1 py-2 space-y-2 min-h-0">
           {optimisticTodos.length === 0 ? (
             <div className="text-center text-muted-foreground py-8 text-sm">
               No tasks yet. Add one to get started!
@@ -151,23 +151,23 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                 <div
                   key={todo.id}
                   className={cn(
-                    "group flex items-center justify-between p-2 rounded-md border bg-card transition-all duration-300",
+                    "group flex items-center justify-between p-3 rounded-lg border bg-card transition-all duration-300",
                     (todo.completed || todo.pending) && "opacity-60 bg-muted/50",
                     isActive && "ring-2 ring-primary border-primary shadow-md scale-[1.02] z-10",
                     isDimmed && "opacity-40 blur-[1px] grayscale"
                   )}
                 >
-                  <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                  <div className="flex items-center gap-3 flex-1 overflow-hidden">
                     <button
                       onClick={() => handleToggleTodo(todo.id, !todo.completed)}
                       className={cn(
-                        "flex-shrink-0 w-4 h-4 rounded-full border border-primary flex items-center justify-center transition-colors",
+                        "flex-shrink-0 w-5 h-5 rounded-full border border-primary flex items-center justify-center transition-colors",
                         todo.completed
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-primary/10"
                       )}
                     >
-                      {todo.completed && <Check className="w-2.5 h-2.5" />}
+                      {todo.completed && <Check className="w-3.5 h-3.5" />}
                     </button>
                     <span
                       className={cn(
@@ -178,7 +178,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                     >
                       {todo.text}
                     </span>
-                    <div className="flex items-center text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded mr-1">
+                    <div className="flex items-center text-[10px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full mr-1">
                       {todo.duration || 30}m
                     </div>
                   </div>
@@ -189,21 +189,21 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                           size="icon-sm"
                           onClick={() => onFocusTask(isActive ? null : todo.id)}
                           className={cn(
-                            "h-7 w-7", 
+                            "h-8 w-8", 
                             isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
                           )}
                           title={isActive ? "Stop Focusing" : "Focus on this task"}
                         >
-                          <Target className="w-3.5 h-3.5" />
+                          <Target className="w-4 h-4" />
                         </Button>
                      )}
                     <Button
                       variant="ghost"
                       size="icon-sm"
                       onClick={() => handleDeleteTodo(todo.id)}
-                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Todo } from "@/db/schema";
 import { PomodoroTimer, PomodoroTimerRef } from "@/components/pomodoro-timer";
 import { TodoSection } from "@/components/todo-section";
+import { QuotesWidget } from "@/components/quotes-widget";
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
+import { Todo } from "@/db/schema";
 
 interface DashboardProps {
   todos: Todo[];
@@ -29,7 +30,7 @@ export function Dashboard({ todos }: DashboardProps) {
   }, [activeTask]);
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-4 overflow-hidden">
       {/* Active Task Hero Section */}
       {activeTask && (
         <div className="animate-in slide-in-from-top-4 duration-300 shrink-0">
@@ -59,13 +60,19 @@ export function Dashboard({ todos }: DashboardProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full items-start">
-        <div className="flex flex-col gap-4 h-full col-span-1">
-          <PomodoroTimer ref={timerRef} />
+      {/* Main Grid: Pomodoro & Todos */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
+        <div className="h-full lg:col-span-4 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-[6] min-h-0">
+            <PomodoroTimer ref={timerRef} />
+          </div>
+          <div className="flex-[4] min-h-0">
+            <QuotesWidget />
+          </div>
         </div>
         
         <div className={cn(
-          "h-full transition-all duration-500 col-span-1 lg:col-span-2",
+          "h-full transition-all duration-500 lg:col-span-8 min-h-[300px]",
           activeTaskId ? "opacity-90" : "opacity-100"
         )}>
           <TodoSection  
