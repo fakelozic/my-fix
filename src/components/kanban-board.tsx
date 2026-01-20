@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useOptimistic, useTransition } from "react";
+import { useRef, useOptimistic, useTransition, useState } from "react";
 import { Todo } from "@/db/schema";
 import { updateTodoStatus, addTodo, deleteTodo } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,20 +20,21 @@ interface KanbanBoardProps {
   todos: Todo[];
 }
 
+type OptimisticAction = 
+  | { type: "add"; payload: Partial<Todo> }
+  | { type: "move"; payload: { id: number; status: string } }
+  | { type: "delete"; payload: { id: number } };
+
 const COLUMNS = [
   { id: "todo", label: "To Do", icon: Circle, color: "text-slate-500" },
   { id: "in-progress", label: "In Progress", icon: Clock, color: "text-blue-500" },
   { id: "done", label: "Done", icon: CheckCircle2, color: "text-green-500" },
 ];
 
-type OptimisticAction = 
-  | { type: "add"; payload: Partial<Todo> }
-  | { type: "move"; payload: { id: number; status: string } }
-  | { type: "delete"; payload: { id: number } };
-
 export function KanbanBoard({ todos }: KanbanBoardProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const [optimisticTodos, addOptimisticTodo] = useOptimistic(
     todos,
@@ -152,13 +153,24 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                             <CardContent className="p-3 flex flex-col gap-2">
                                 <div className="flex justify-between items-start gap-2">
                                     <p className="text-base font-medium leading-relaxed break-words">{todo.text}</p>
-                                    <DropdownMenu>
+                                    <DropdownMenu 
+                                        open={openMenuId === todo.id} 
+                                        onOpenChange={(open) => !open && setOpenMenuId(null)}
+                                    >
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon-sm" className="h-6 w-6 shrink-0 text-muted-foreground">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon-sm" 
+                                                className="h-6 w-6 shrink-0 text-muted-foreground"
+                                                onMouseEnter={() => setOpenMenuId(todo.id)}
+                                            >
                                                 <MoreHorizontal className="w-4 h-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
+                                        <DropdownMenuContent 
+                                            align="end" 
+                                            onMouseLeave={() => setOpenMenuId(null)}
+                                        >
                                             {COLUMNS.filter(c => c.id !== col.id).map(targetCol => (
                                                 <DropdownMenuItem 
                                                     key={targetCol.id}
