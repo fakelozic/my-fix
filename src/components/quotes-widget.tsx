@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useOptimistic, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Quote as QuoteIcon, Plus, X, List, Trash2 } from "lucide-react";
 import { getDailyQuotes, getQuotes, addQuote, deleteQuote } from "@/app/actions";
 import { Quote } from "@/db/schema";
+import { toast } from "sonner";
 
 export function QuotesWidget() {
   const [displayQuotes, setDisplayQuotes] = useState<Quote[]>([]);
@@ -15,6 +16,28 @@ export function QuotesWidget() {
   const [isManaging, setIsManaging] = useState(false);
   const [newQuote, setNewQuote] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+
+  const [optimisticAllQuotes, addOptimisticQuote] = useOptimistic(
+    allQuotes,
+    (state: Quote[], action: { type: string; payload: any }) => {
+      switch (action.type) {
+        case "add":
+          return [
+            ...state,
+            {
+              ...action.payload,
+              id: Math.random(),
+              createdAt: new Date(),
+            },
+          ];
+        case "delete":
+          return state.filter((q) => q.id !== action.payload.id);
+        default:
+          return state;
+      }
+    }
+  );
 
   const fetchDaily = async () => {
     try {
@@ -49,23 +72,37 @@ export function QuotesWidget() {
   const handleAddQuote = async () => {
     if (!newQuote.trim()) return;
     
-    const formData = new FormData();
-    formData.append("text", newQuote.trim());
-    
-    await addQuote(formData);
-    
+    const text = newQuote.trim();
     setNewQuote("");
     setIsAdding(false);
     
-    // Refresh lists
-    await fetchDaily();
-    if (isManaging) await fetchAll();
+    startTransition(async () => {
+        addOptimisticQuote({ type: "add", payload: { text } });
+        const formData = new FormData();
+        formData.append("text", text);
+        
+        const result = await addQuote(formData);
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            // Refresh lists on success
+            await fetchDaily();
+            if (isManaging) await fetchAll();
+        }
+    });
   };
 
   const handleDeleteQuote = async (id: number) => {
-    await deleteQuote(id);
-    await fetchAll();
-    await fetchDaily(); // Update display if the deleted one was shown
+    startTransition(async () => {
+        addOptimisticQuote({ type: "delete", payload: { id } });
+        const result = await deleteQuote(id);
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            await fetchAll();
+            await fetchDaily();
+        }
+    });
   };
 
   return (
@@ -107,7 +144,7 @@ export function QuotesWidget() {
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && handleAddQuote()}
                 />
-                <Button onClick={handleAddQuote} size="sm">Save</Button>
+                <Button onClick={handleAddQuote} size="sm" disabled={isPending}>Save</Button>
                 <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)}>
                     <X className="w-4 h-4" />
                 </Button>
@@ -116,10 +153,10 @@ export function QuotesWidget() {
 
         {isManaging ? (
             <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-2">
-                {allQuotes.length === 0 ? (
+                {optimisticAllQuotes.length === 0 ? (
                     <p className="text-center text-sm text-muted-foreground py-4">No quotes saved.</p>
                 ) : (
-                    allQuotes.map((q) => (
+                    optimisticAllQuotes.map((q) => (
                         <div key={q.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/50 border text-sm group">
                             <span className="flex-1 truncate">{q.text}</span>
                             <Button 
@@ -127,6 +164,7 @@ export function QuotesWidget() {
                                 size="icon" 
                                 onClick={() => handleDeleteQuote(q.id)}
                                 className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
+                                disabled={isPending}
                             >
                                 <Trash2 className="w-3 h-3" />
                             </Button>

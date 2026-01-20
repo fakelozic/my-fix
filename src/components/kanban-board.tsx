@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useOptimistic, useTransition } from "react";
 import { Todo } from "@/db/schema";
 import { updateTodoStatus, addTodo, deleteTodo } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface KanbanBoardProps {
   todos: Todo[];
@@ -27,19 +28,78 @@ const COLUMNS = [
 
 export function KanbanBoard({ todos }: KanbanBoardProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
+    todos,
+    (state: Todo[], action: { type: string; payload: any }) => {
+      switch (action.type) {
+        case "add":
+          return [
+            ...state,
+            {
+              ...action.payload,
+              id: Math.random(),
+              status: "todo",
+              completed: false,
+              createdAt: new Date(),
+            },
+          ];
+        case "move":
+          return state.map((t) =>
+            t.id === action.payload.id ? { ...t, status: action.payload.status, completed: action.payload.status === "done" } : t
+          );
+        case "delete":
+          return state.filter((t) => t.id !== action.payload.id);
+        default:
+          return state;
+      }
+    }
+  );
 
   const getColumnTodos = (status: string) => {
     if (status === "todo") {
-        return todos.filter(t => t.status === "todo" || (!t.status && !t.completed));
+        return optimisticTodos.filter(t => t.status === "todo" || (!t.status && !t.completed));
     }
     if (status === "done") {
-        return todos.filter(t => t.status === "done" || (!t.status && t.completed));
+        return optimisticTodos.filter(t => t.status === "done" || (!t.status && t.completed));
     }
-    return todos.filter(t => t.status === status);
+    return optimisticTodos.filter(t => t.status === status);
+  };
+
+  const handleAddTodo = async (formData: FormData) => {
+    const text = formData.get("text") as string;
+    if (!text?.trim()) return;
+
+    formRef.current?.reset();
+    
+    startTransition(async () => {
+        addOptimisticTodo({ type: "add", payload: { text, type: "kanban" } });
+        const result = await addTodo(formData);
+        if (result?.error) {
+            toast.error(result.error);
+        }
+    });
   };
 
   const moveTask = async (id: number, nextStatus: string) => {
-     await updateTodoStatus(id, nextStatus);
+    startTransition(async () => {
+        addOptimisticTodo({ type: "move", payload: { id, status: nextStatus } });
+        const result = await updateTodoStatus(id, nextStatus);
+        if (result?.error) {
+            toast.error(result.error);
+        }
+    });
+  };
+
+  const handleDeleteTodo = async (id: number) => {
+    startTransition(async () => {
+        addOptimisticTodo({ type: "delete", payload: { id } });
+        const result = await deleteTodo(id);
+        if (result?.error) {
+            toast.error(result.error);
+        }
+    });
   };
 
   return (
@@ -47,16 +107,13 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
       <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Project Board</h2>
           <form
-            action={async (formData) => {
-                await addTodo(formData);
-                formRef.current?.reset();
-            }}
+            action={handleAddTodo}
             ref={formRef}
             className="flex gap-2 w-full max-w-sm"
           >
             <Input name="text" placeholder="Add a project task..." className="bg-background" autoComplete="off" />
             <input type="hidden" name="type" value="kanban" />
-            <Button type="submit">
+            <Button type="submit" disabled={isPending}>
                 <Plus className="w-4 h-4 mr-2" /> Add
             </Button>
           </form>
@@ -107,7 +164,7 @@ export function KanbanBoard({ todos }: KanbanBoardProps) {
                                             ))}
                                             <DropdownMenuItem 
                                                 className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                                                onClick={() => deleteTodo(todo.id)}
+                                                onClick={() => handleDeleteTodo(todo.id)}
                                             >
                                                 <Trash2 className="w-4 h-4 mr-2" />
                                                 Delete

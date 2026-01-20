@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useOptimistic, useTransition } from "react";
 import { addTodo, toggleTodo, deleteTodo } from "@/app/actions";
 import { Todo } from "@/db/schema";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Check, Trash2, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface TodoSectionProps {
   todos: Todo[];
@@ -15,8 +16,75 @@ interface TodoSectionProps {
   onFocusTask?: (id: number | null) => void;
 }
 
+type OptimisticTodo = Todo & { pending?: boolean };
+
 export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
+    todos,
+    (state: OptimisticTodo[], action: { type: string; payload: any }) => {
+      switch (action.type) {
+        case "add":
+          return [
+            ...state,
+            {
+              ...action.payload,
+              id: Math.random(),
+              pending: true,
+              completed: false,
+              createdAt: new Date(),
+            },
+          ];
+        case "toggle":
+          return state.map((t) =>
+            t.id === action.payload.id ? { ...t, completed: action.payload.completed } : t
+          );
+        case "delete":
+          return state.filter((t) => t.id !== action.payload.id);
+        default:
+          return state;
+      }
+    }
+  );
+
+  const handleAddTodo = async (formData: FormData) => {
+    const text = formData.get("text") as string;
+    const duration = parseInt(formData.get("duration") as string) || 30;
+    
+    if (!text?.trim()) return;
+
+    formRef.current?.reset();
+    
+    startTransition(async () => {
+      addOptimisticTodo({ type: "add", payload: { text, duration, type: "daily" } });
+      const result = await addTodo(formData);
+      if (result?.error) {
+        toast.error(result.error);
+      }
+    });
+  };
+
+  const handleToggleTodo = async (id: number, completed: boolean) => {
+    startTransition(async () => {
+      addOptimisticTodo({ type: "toggle", payload: { id, completed } });
+      const result = await toggleTodo(id, completed);
+      if (result?.error) {
+        toast.error(result.error);
+      }
+    });
+  };
+
+  const handleDeleteTodo = async (id: number) => {
+    startTransition(async () => {
+      addOptimisticTodo({ type: "delete", payload: { id } });
+      const result = await deleteTodo(id);
+      if (result?.error) {
+        toast.error(result.error);
+      }
+    });
+  };
 
   return (
     <Card className="w-full h-full flex flex-col bg-background/50 backdrop-blur-sm">
@@ -29,10 +97,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
       <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden p-4 pt-3">
         
         <form
-          action={async (formData) => {
-            await addTodo(formData);
-            formRef.current?.reset();
-          }}
+          action={handleAddTodo}
           ref={formRef}
           className="flex gap-2 relative z-10"
         >
@@ -50,6 +115,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             size="sm" 
             variant="secondary"
             className="h-9"
+            disabled={isPending}
           >
             30m
           </Button>
@@ -60,18 +126,19 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
             size="sm" 
             variant="default"
             className="h-9"
+            disabled={isPending}
           >
             60m
           </Button>
         </form>
 
         <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 min-h-[200px] -mx-2">
-          {todos.length === 0 ? (
+          {optimisticTodos.length === 0 ? (
             <div className="text-center text-muted-foreground py-8 text-sm">
               No tasks yet. Add one to get started!
             </div>
           ) : (
-            todos.map((todo) => {
+            optimisticTodos.map((todo) => {
               const isActive = activeTaskId === todo.id;
               const isDimmed = activeTaskId && !isActive;
 
@@ -80,14 +147,14 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                   key={todo.id}
                   className={cn(
                     "group flex items-center justify-between p-2 rounded-md border bg-card transition-all duration-300",
-                    todo.completed && "opacity-60 bg-muted/50",
+                    (todo.completed || (todo as any).pending) && "opacity-60 bg-muted/50",
                     isActive && "ring-2 ring-primary border-primary shadow-md scale-[1.02] z-10",
                     isDimmed && "opacity-40 blur-[1px] grayscale"
                   )}
                 >
                   <div className="flex items-center gap-2 flex-1 overflow-hidden">
                     <button
-                      onClick={() => toggleTodo(todo.id, !todo.completed)}
+                      onClick={() => handleToggleTodo(todo.id, !todo.completed)}
                       className={cn(
                         "flex-shrink-0 w-4 h-4 rounded-full border border-primary flex items-center justify-center transition-colors",
                         todo.completed
@@ -128,7 +195,7 @@ export function TodoSection({ todos, activeTaskId, onFocusTask }: TodoSectionPro
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => deleteTodo(todo.id)}
+                      onClick={() => handleDeleteTodo(todo.id)}
                       className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
