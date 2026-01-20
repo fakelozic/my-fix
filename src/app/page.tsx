@@ -4,6 +4,7 @@ import { logoutAction } from "@/app/auth-actions";
 import { Dashboard } from "@/components/dashboard";
 import { CalendarStats } from "@/components/calendar-stats";
 import { HistoryChart } from "@/components/history-chart";
+import { HistoryTable } from "@/components/history-table";
 import { StickyNotes } from "@/components/sticky-notes";
 import { QuotesWidget } from "@/components/quotes-widget";
 import { KanbanBoard } from "@/components/kanban-board";
@@ -172,12 +173,11 @@ export default async function Home() {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-8">
-            <div className="grid grid-cols-1 gap-8 max-w-6xl mx-auto">
-              <div className="h-[350px]">
-                <HistoryChart todos={dailyTodos} />
-              </div>
-              <CalendarStats todos={dailyTodos} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <HistoryTable todos={dailyTodos} />
+              <HistoryChart todos={dailyTodos} />
             </div>
+            <CalendarStats todos={dailyTodos} />
           </TabsContent>
 
           <TabsContent value="kanban" className="space-y-8 h-full">
