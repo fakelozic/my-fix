@@ -1,16 +1,19 @@
 # my-fix
 
-my-fix is a modern, high-performance productivity dashboard designed to help users manage their daily tasks, visualize their focus trends, and stay inspired.
+my-fix is a modern, high-performance productivity dashboard designed to help users manage their daily tasks, track long-term habits, visualize focus trends, and stay inspired.
 
 ## Core Features
 
+-   **Dynamic Habit Tracking**: A dedicated "Habits" system where you can define and track recurring tasks with a simple cycle-toggle (Done, Missed, or Partial).
 -   **Intelligent Task Management**: Organize your day with a dedicated Daily Tasks section and a flexible Kanban Board.
 -   **Deep Work Timer**: Built-in Pomodoro-style timer with preset focus sessions (30m/60m) to help you enter flow states.
--   **Database Encryption**: Personal data (tasks, kanban items, quotes) is encrypted using AES-256-CBC before being stored, ensuring your privacy.
+-   **Multi-View History**: 
+    -   **Week View**: A condensed breakdown of focus time and habit completion scores grouped by month.
+    -   **Month View**: High-detail habit completion matrices and interactive focus heatmaps.
+-   **Database Encryption**: Personal data (habits, tasks, kanban items, quotes) is encrypted using AES-256-CBC before being stored, ensuring your privacy.
 -   **Hourly Inspiration**: A custom Quotes widget that rotates your favorite motivational snippets every hour with automatic updates.
--   **Visual Analytics**: Track your productivity over time with interactive history charts and calendar heatmaps.
--   **Secure Sessions**: Built-in JWT-based authentication to keep your tasks and notes private.
--   **Modern UI**: A beautiful, dark-mode-first design with glassmorphism effects and responsive layouts optimized for both desktop and mobile.
+-   **Sticky Notes**: Quick-access notes section for jotting down fleeting thoughts and reminders.
+-   **Modern UI**: A responsive, 3-column dashboard layout designed for a full-height experience on PC and native scrolling on mobile.
 
 ## Tech Stack
 
@@ -45,7 +48,8 @@ my-fix is a modern, high-performance productivity dashboard designed to help use
    ```
 4. Push the database schema:
    ```bash
-   npx drizzle-kit push
+   npx drizzle-kit generate
+   npx drizzle-kit migrate
    ```
 5. Start the development server:
    ```bash
@@ -54,4 +58,4 @@ my-fix is a modern, high-performance productivity dashboard designed to help use
 
 ## Productivity Principles
 
-my-fix is built on the philosophy that productivity is about **focus, not just busyness**. By combining task tracking with time-blocking (the timer) and reflection (the history charts), it provides a holistic environment to improve your work habits and maintain a consistent focus streak.
+my-fix is built on the philosophy that productivity is about **consistency and focus**. By combining habit tracking, time-blocking, and visual reflection, it provides a holistic environment to improve your work systems and maintain a sustainable peak performance.
