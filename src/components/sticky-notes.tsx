@@ -87,7 +87,7 @@ export function StickyNotes() {
                 value={note.text}
                 onChange={(e) => updateNote(note.id, e.target.value)}
                 placeholder="Type here..."
-                className="flex-1 resize-none border-none bg-transparent focus-visible:ring-0 p-0 text-sm leading-relaxed"
+                className="flex-1 resize-none border-none bg-transparent focus-visible:ring-0 p-0 text-sm leading-relaxed shadow-none"
               />
             </div>
           ))}
