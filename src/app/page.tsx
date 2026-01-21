@@ -84,6 +84,10 @@ export default async function Home() {
     (t) => t.completed && t.completedAt && new Date(t.completedAt) >= today,
   );
 
+  const visibleTodos = dailyTodos.filter(
+    (t) => !t.completed || (t.completedAt && new Date(t.completedAt) >= today),
+  );
+
   const totalMinutes = completedToday.reduce(
     (acc, t) => acc + (t.duration || 30),
     0,
@@ -177,7 +181,7 @@ export default async function Home() {
             {/* 3. Dashboard Column (6 cols) */}
             <div className="lg:col-span-6 min-h-[600px] lg:h-full flex flex-col gap-4">
                <div className="flex-1 overflow-hidden">
-                  <Dashboard todos={dailyTodos} />
+                  <Dashboard todos={visibleTodos} />
                </div>
             </div>
           </div>
